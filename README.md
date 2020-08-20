@@ -20,8 +20,8 @@ Alternativamente é possível iniciar o programa separadamente mas com uma inst�
 
 Com isto, no Eclipse, se torna necessário finalmente configurar duas variáveis de ambiente: `REPROVA_MONGO`, que contém a URL do servidor Mongo, e `PORT`, que representa a porta na qual o serviço do Reprova irá rodar. Apesar de se tratarem de variáveis de ambiente eu não consegui fazer com que o programa as lesse apenas exportando-as no terminal. A maneira pela qual consegui, graças a [esta resposta no Stack Overflow](https://stackoverflow.com/a/12810433/4357295), se baseia em configurar as variáveis de ambiente diretamente no Eclipse, o que pode ser feito segundo as imagens a seguir:
 
-![Localidade Eclipse](https://github.com/ghapereira/reprova/assets/location.png)
-![Variáveis](https://github.com/ghapereira/reprova/assets/envs.png)
+![Localidade Eclipse](https://github.com/ghapereira/reprova/blob/master/assets/location.png)
+![Variáveis](https://github.com/ghapereira/reprova/blob/master/assets/envs.png)
 
 Após configurar estas variáveis deve ser o suficiente clicar no botão de executar na própria janela de configuração das variáveis. Uma outra maneira de se executar o projeto é selecionar o arquivo principal (no caso, `br.engsoft.reprova.Reprova.java`) com o botão direito e clicar em "Run as".
 
