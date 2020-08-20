@@ -36,6 +36,8 @@ public class Mongo {
    * @param db  the database name.
    */
   public Mongo(String db) {
+	System.out.println(Mongo.endpoint);
+	  
     this.db = MongoClients
       .create(Mongo.endpoint)
       .getDatabase(db);

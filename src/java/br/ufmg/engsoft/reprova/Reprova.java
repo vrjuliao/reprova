@@ -9,8 +9,15 @@ import br.ufmg.engsoft.reprova.mime.json.Json;
 public class Reprova {
   public static void main(String[] args) {
     var json = new Json();
+    
+    Mongo db;
 
-    var db = new Mongo("reprova");
+    try {
+    	db = new Mongo("reprova");
+    } catch(Exception e) {
+    	System.out.println(e);
+    	return;
+    }
 
     var questionsDAO = new QuestionsDAO(db, json);
 
