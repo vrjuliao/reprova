@@ -40,11 +40,13 @@ public class Setup {
    * @throws IllegalArgumentException  if any parameter is null
    */
   public static void routes(Json json, QuestionsDAO questionsDAO) {
-    if (json == null)
+    if (json == null) {
       throw new IllegalArgumentException("json mustn't be null");
+    }
 
-    if (questionsDAO == null)
+    if (questionsDAO == null) {
       throw new IllegalArgumentException("questionsDAO mustn't be null");
+    }
 
 
     Spark.port(Setup.port);

@@ -4,6 +4,11 @@ import spark.Spark;
 import spark.Request;
 import spark.Response;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +34,7 @@ public class Questions {
   /**
    * Messages.
    */
-  protected static final String unauthorised = "\"Unauthorised\"";
+  protected static final String unauthorized = "\"Unauthorized\"";
   protected static final String invalid = "\"Invalid request\"";
   protected static final String ok = "\"Ok\"";
 
@@ -43,8 +48,6 @@ public class Questions {
    */
   protected final QuestionsDAO questionsDAO;
 
-
-
   /**
    * Instantiate the questions endpoint.
    * The setup method must be called to install the endpoint.
@@ -53,16 +56,17 @@ public class Questions {
    * @throws IllegalArgumentException  if any parameter is null
    */
   public Questions(Json json, QuestionsDAO questionsDAO) {
-    if (json == null)
+    if (json == null) {
       throw new IllegalArgumentException("json mustn't be null");
+    }
 
-    if (questionsDAO == null)
+    if (questionsDAO == null) {
       throw new IllegalArgumentException("questionsDAO mustn't be null");
+    }
 
     this.json = json;
     this.questionsDAO = questionsDAO;
   }
-
 
 
   /**
@@ -80,14 +84,12 @@ public class Questions {
     logger.info("Setup /api/questions.");
   }
 
-
   /**
-   * Check if the given token is authorised.
+   * Check if the given token is authorized.
    */
-  protected static boolean authorised(String token) {
+  protected static boolean authorized(String token) {
     return Questions.token.equals(token);
   }
-
 
   /**
    * Get endpoint: lists all questions, or a single question if a 'id' query parameter is
@@ -97,11 +99,13 @@ public class Questions {
     logger.info("Received questions get:");
 
     var id = request.queryParams("id");
-    var auth = authorised(request.queryParams("token"));
-
-    return id == null
-      ? this.get(request, response, auth)
-      : this.get(request, response, id, auth);
+    var auth = authorized(request.queryParams("token"));
+      
+    if (id == null) {
+    	return this.get(request, response, auth);
+    }
+     
+    return this.get(request, response, id, auth);
   }
 
   /**
@@ -109,8 +113,9 @@ public class Questions {
    * If not authorised, and the given question is private, returns an error message.
    */
   protected Object get(Request request, Response response, String id, boolean auth) {
-    if (id == null)
+    if (id == null) {
       throw new IllegalArgumentException("id mustn't be null");
+    }
 
     response.type("application/json");
 
@@ -125,9 +130,9 @@ public class Questions {
     }
 
     if (question.pvt && !auth) {
-      logger.info("Unauthorised token: " + token);
+      logger.info("Unauthorized token: " + token);
       response.status(403);
-      return unauthorised;
+      return unauthorized;
     }
 
     logger.info("Done. Responding...");
@@ -139,7 +144,7 @@ public class Questions {
 
   /**
    * Get all endpoint: fetch all questions from the database.
-   * If not authorised, fetches only public questions.
+   * If not authorized, fetches only public questions.
    */
   protected Object get(Request request, Response response, boolean auth) {
     response.type("application/json");
@@ -175,10 +180,10 @@ public class Questions {
 
     var token = request.queryParams("token");
 
-    if (!authorised(token)) {
-      logger.info("Unauthorised token: " + token);
+    if (!authorized(token)) {
+      logger.info("Unauthorized token: " + token);
       response.status(403);
-      return unauthorised;
+      return unauthorized;
     }
 
     Question question;
@@ -194,7 +199,6 @@ public class Questions {
     }
 
     logger.info("Parsed " + question.toString());
-
     logger.info("Adding question.");
 
     var success = questionsDAO.add(question);
@@ -223,10 +227,10 @@ public class Questions {
     var id = request.queryParams("id");
     var token = request.queryParams("token");
 
-    if (!authorised(token)) {
-      logger.info("Unauthorised token: " + token);
+    if (!authorized(token)) {
+      logger.info("Unauthorized token: " + token);
       response.status(403);
-      return unauthorised;
+      return unauthorized;
     }
 
     if (id == null) {

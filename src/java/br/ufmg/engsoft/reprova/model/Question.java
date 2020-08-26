@@ -84,27 +84,33 @@ public class Question {
      * @throws IllegalArgumentException  if any parameter is invalid
      */
     public Question build() {
-      if (theme == null)
+      if (theme == null) {
         throw new IllegalArgumentException("theme mustn't be null");
+      }
 
-      if (theme.isEmpty())
+      if (theme.isEmpty()) {
         throw new IllegalArgumentException("theme mustn't be empty");
+      }
 
-      if (description == null)
+      if (description == null) {
         throw new IllegalArgumentException("description mustn't be null");
+      }
 
-      if (description.isEmpty())
+      if (description.isEmpty()) {
         throw new IllegalArgumentException("description mustn't be empty");
+      }
 
-
-      if (this.record == null)
+      if (this.record == null) {
         this.record = new HashMap<Semester, Map<String, Float>>();
-      else
+      }
+      else {
         // All inner maps mustn't be null:
-        for (var entry : this.record.entrySet())
-          if (entry.getValue() == null)
-            throw new IllegalArgumentException("inner record mustn't be null");
-
+        for (var entry : this.record.entrySet()) {
+        	if (entry.getValue() == null) {
+                throw new IllegalArgumentException("inner record mustn't be null");
+        	}
+        }    
+      }
 
       return new Question(
         this.id,
@@ -144,11 +150,13 @@ public class Question {
    */
   @Override
   public boolean equals(Object obj) {
-    if (obj == this)
+    if (obj == this) {
       return true;
+    }
 
-    if (!(obj instanceof Question))
+    if (!(obj instanceof Question)) {
       return false;
+    }
 
     var question = (Question) obj;
 
@@ -187,7 +195,7 @@ public class Question {
     builder.append("  desc: " + this.description + "\n");
     builder.append("  record: " + this.record + "\n");
     builder.append("  pvt: " + this.pvt + "\n");
-    if (this.statement != null)
+    if (this.statement != null) {
       builder.append(
         "  head: " +
         this.statement.substring(
@@ -196,6 +204,7 @@ public class Question {
         ) +
         "\n"
       );
+    }
 
     return builder.toString();
   }

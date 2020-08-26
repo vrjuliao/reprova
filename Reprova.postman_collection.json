@@ -1,0 +1,153 @@
+{
+	"info": {
+		"_postman_id": "c738459c-81e9-4bcf-b34b-eebfbc94d221",
+		"name": "Reprova",
+		"description": "Coleção destinada a testar os endpoints do trabalho da disciplina de Reuso de Software - Reprova",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "List public questions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{server}}/api/questions",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"api",
+						"questions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List all questions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{server}}/api/questions?token={{token}}",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"api",
+						"questions"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create public question",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"theme\": \"Software Engineering\",\n    \"description\": \"Sample description\",\n    \"statement\": \"A sample software engineering question\",\n    \"pvt\": false\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server}}/api/questions?token={{token}}",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"api",
+						"questions"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create private question",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"theme\": \"Software Engineering\",\n    \"description\": \"Sample private description\",\n    \"statement\": \"A sample private software engineering question\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{server}}/api/questions?token={{token}}",
+					"host": [
+						"{{server}}"
+					],
+					"path": [
+						"api",
+						"questions"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "b7c57c41-54f0-4ac2-bf58-322a530287d8",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "42843820-da8f-43e2-b097-ab8c9ffcd23a",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "a04d57df-cf46-43a7-8016-5c0b9749a326",
+			"key": "token",
+			"value": "d2fad245dd1d8a4f863e3f1c32bdada723361e6f63cfddf56663e516e47347bb"
+		},
+		{
+			"id": "9741b410-73e9-4dfe-869a-110dbf02c646",
+			"key": "server",
+			"value": "localhost:8888"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
