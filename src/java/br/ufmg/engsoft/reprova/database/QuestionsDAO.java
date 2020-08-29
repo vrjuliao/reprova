@@ -175,7 +175,8 @@ public class QuestionsDAO {
       .append("description", question.description)
       .append("statement", question.statement)
       .append("record", new Document(record))
-      .append("pvt", question.pvt);
+      .append("pvt", question.pvt)
+      .append("estimatedTime", question.estimatedTime);
 
     var id = question.id;
     if (id != null) {

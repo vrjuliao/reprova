@@ -34,7 +34,10 @@ public class Question {
    * Whether the question is private.
    */
   public final boolean pvt;
-
+  /**
+   * The estimated time in minutes for the question to be solved
+   */
+  public final int estimatedTime;
 
 
   /**
@@ -47,6 +50,7 @@ public class Question {
     protected String statement;
     protected Map<Semester, Map<String, Float>> record;
     protected boolean pvt = true;
+    protected int estimatedTime;
 
     public Builder id(String id) {
       this.id = id;
@@ -75,6 +79,11 @@ public class Question {
 
     public Builder pvt(boolean pvt) {
       this.pvt = pvt;
+      return this;
+    }
+
+    public Builder estimatedTime(int estimatedTime){
+      this.estimatedTime = estimatedTime;
       return this;
     }
 
@@ -118,7 +127,8 @@ public class Question {
         this.description,
         this.statement,
         this.record,
-        this.pvt
+        this.pvt,
+        this.estimatedTime
       );
     }
   }
@@ -132,7 +142,8 @@ public class Question {
     String description,
     String statement,
     Map<Semester, Map<String, Float>> record,
-    boolean pvt
+    boolean pvt,
+    int estimatedTime
   ) {
     this.id = id;
     this.theme = theme;
@@ -140,6 +151,7 @@ public class Question {
     this.statement = statement;
     this.record = record;
     this.pvt = pvt;
+    this.estimatedTime = estimatedTime;
   }
 
 
@@ -165,7 +177,8 @@ public class Question {
         && this.description.equals(question.description)
         && this.statement.equals(question.statement)
         && this.record.equals(question.record)
-        && this.pvt == question.pvt;
+        && this.pvt == question.pvt
+        && this.estimatedTime == question.estimatedTime;
   }
 
 
@@ -177,7 +190,8 @@ public class Question {
       this.description,
       this.statement,
       this.record,
-      this.pvt
+      this.pvt,
+      this.estimatedTime
     );
   }
 
@@ -195,6 +209,7 @@ public class Question {
     builder.append("  desc: " + this.description + "\n");
     builder.append("  record: " + this.record + "\n");
     builder.append("  pvt: " + this.pvt + "\n");
+    builder.append("  estimatedTime: " + this.estimatedTime + "\n");
     if (this.statement != null) {
       builder.append(
         "  head: " +
