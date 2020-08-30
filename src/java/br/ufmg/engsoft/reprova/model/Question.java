@@ -1,8 +1,10 @@
 package br.ufmg.engsoft.reprova.model;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.List;
 
 
 /**
@@ -34,6 +36,14 @@ public class Question {
    * Whether the question is private.
    */
   public final boolean pvt;
+  /**
+   * The difficulty of the question. May have different groupings.
+   */
+  public String difficulty;
+  /**
+   * The difficulty's possible values.
+   */
+  private final List<String> difficultyGroup;
 
 
 
@@ -47,6 +57,8 @@ public class Question {
     protected String statement;
     protected Map<Semester, Map<String, Float>> record;
     protected boolean pvt = true;
+    protected String difficulty;
+    protected List<String> difficultyGroup;
 
     public Builder id(String id) {
       this.id = id;
@@ -75,6 +87,16 @@ public class Question {
 
     public Builder pvt(boolean pvt) {
       this.pvt = pvt;
+      return this;
+    }
+
+    public Builder difficulty(String difficulty){
+      this.difficulty = difficulty;
+      return this;
+    }
+    
+    public Builder difficultyGroup(List<String> difficulty){
+      this.difficultyGroup = difficultyGroup;
       return this;
     }
 
@@ -112,13 +134,25 @@ public class Question {
         }    
       }
 
+      String envDifficultyGroup = System.getenv("DIFFICULTY_GROUP");
+      if (envDifficultyGroup != null){
+        String[] g1 = {"Hard", "Average", "Easy"};
+        String[] g2 = {"Very Hard", "Hard", "Average", "Easy", "Very Easy"};
+
+        this.difficultyGroup = envDifficultyGroup.equals("3") ? Arrays.asList(g1) : Arrays.asList(g2);
+      } else {
+        this.difficultyGroup = null;
+      }
+
       return new Question(
         this.id,
         this.theme,
         this.description,
         this.statement,
         this.record,
-        this.pvt
+        this.pvt,
+        this.difficulty,
+        this.difficultyGroup
       );
     }
   }
@@ -132,7 +166,9 @@ public class Question {
     String description,
     String statement,
     Map<Semester, Map<String, Float>> record,
-    boolean pvt
+    boolean pvt,
+    String difficulty,
+    List<String> difficultyGroup
   ) {
     this.id = id;
     this.theme = theme;
@@ -140,8 +176,48 @@ public class Question {
     this.statement = statement;
     this.record = record;
     this.pvt = pvt;
+    this.difficulty = difficulty;
+    this.difficultyGroup = difficultyGroup;
   }
 
+
+  /**
+   * Calculate the difficulty based on the record and the difficultyGroup.
+   * Should be called when changes are made to the record.
+   */
+  public void calculateDifficulty(){
+    if (this.difficultyGroup == null){
+      return;
+    }
+
+    double acc = 0;
+    for (Map.Entry<Semester, Map<String, Float>> entry : this.record.entrySet()) {
+      acc += entry.getValue().values().stream().mapToDouble(Float::doubleValue).average().orElse(0);
+    };
+
+    double average = acc/this.record.size();
+    if (this.difficultyGroup.size() == 3){
+      if (average < 33.3){
+        this.difficulty = this.difficultyGroup.get(0);
+      } else if (average < 66.6){
+        this.difficulty = this.difficultyGroup.get(1);
+      } else {
+        this.difficulty = this.difficultyGroup.get(2);
+      }
+    } else {
+      if (average < 20){
+        this.difficulty = this.difficultyGroup.get(0);
+      } else if (average < 40){
+        this.difficulty = this.difficultyGroup.get(1);
+      } else if (average < 60){
+        this.difficulty = this.difficultyGroup.get(2);
+      } else if (average < 80){
+        this.difficulty = this.difficultyGroup.get(3);
+      } else {
+        this.difficulty = this.difficultyGroup.get(4);
+      }
+    }
+  }
 
 
   /**
@@ -165,7 +241,8 @@ public class Question {
         && this.description.equals(question.description)
         && this.statement.equals(question.statement)
         && this.record.equals(question.record)
-        && this.pvt == question.pvt;
+        && this.pvt == question.pvt
+        && this.difficulty.equals(question.difficulty);
   }
 
 
@@ -177,7 +254,8 @@ public class Question {
       this.description,
       this.statement,
       this.record,
-      this.pvt
+      this.pvt,
+      this.difficulty
     );
   }
 
@@ -195,6 +273,8 @@ public class Question {
     builder.append("  desc: " + this.description + "\n");
     builder.append("  record: " + this.record + "\n");
     builder.append("  pvt: " + this.pvt + "\n");
+    builder.append("  difficulty: " + this.difficulty + "\n");
+    builder.append("  difficultyGroup: " + this.difficultyGroup + "\n");
     if (this.statement != null) {
       builder.append(
         "  head: " +
