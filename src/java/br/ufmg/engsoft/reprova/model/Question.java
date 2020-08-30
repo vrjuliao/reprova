@@ -1,6 +1,8 @@
 package br.ufmg.engsoft.reprova.model;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -35,7 +37,7 @@ public class Question {
    */
   public final boolean pvt;
 
-
+  private List<Answer> answers;
 
   /**
    * Builder for Question.
@@ -47,6 +49,7 @@ public class Question {
     protected String statement;
     protected Map<Semester, Map<String, Float>> record;
     protected boolean pvt = true;
+    protected List<Answer> answers;
 
     public Builder id(String id) {
       this.id = id;
@@ -78,7 +81,6 @@ public class Question {
       return this;
     }
 
-
     /**
      * Build the question.
      * @throws IllegalArgumentException  if any parameter is invalid
@@ -102,14 +104,18 @@ public class Question {
 
       if (this.record == null) {
         this.record = new HashMap<Semester, Map<String, Float>>();
-      }
-      else {
+      } else {
         // All inner maps mustn't be null:
         for (var entry : this.record.entrySet()) {
         	if (entry.getValue() == null) {
                 throw new IllegalArgumentException("inner record mustn't be null");
         	}
         }    
+      }
+      
+      String answersEnabled = System.getenv("ENABLE_ANSWERS"); 
+      if (answersEnabled != null && answersEnabled.equals("true")) {
+    	  this.answers = new ArrayList<Answer>();
       }
 
       return new Question(
@@ -118,7 +124,8 @@ public class Question {
         this.description,
         this.statement,
         this.record,
-        this.pvt
+        this.pvt,
+        this.answers
       );
     }
   }
@@ -132,7 +139,8 @@ public class Question {
     String description,
     String statement,
     Map<Semester, Map<String, Float>> record,
-    boolean pvt
+    boolean pvt,
+    List<Answer> answers
   ) {
     this.id = id;
     this.theme = theme;
