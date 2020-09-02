@@ -51,11 +51,13 @@ public class QuestionsDAO {
    * @throws IllegalArgumentException  if any parameter is null
    */
   public QuestionsDAO(Mongo db, Json json) {
-    if (db == null)
+    if (db == null) {
       throw new IllegalArgumentException("db mustn't be null");
+    }
 
-    if (json == null)
+    if (json == null) {
       throw new IllegalArgumentException("json mustn't be null");
+    }
 
     this.collection = db.getCollection("questions");
 
@@ -71,8 +73,9 @@ public class QuestionsDAO {
    * @throws IllegalArgumentException  if the given document is an invalid Question
    */
   protected Question parseDoc(Document document) {
-    if (document == null)
+    if (document == null) {
       throw new IllegalArgumentException("document mustn't be null");
+    }
 
     var doc = document.toJson();
 
@@ -157,8 +160,9 @@ public class QuestionsDAO {
    * @throws IllegalArgumentException  if any parameter is null
    */
   public boolean add(Question question) {
-    if (question == null)
+    if (question == null) {
       throw new IllegalArgumentException("question mustn't be null");
+    }
 
     Map<String, Object> record = question.record // Convert the keys to string,
       .entrySet()                                // and values to object.
@@ -189,8 +193,9 @@ public class QuestionsDAO {
         return false;
       }
     }
-    else
+    else {
       this.collection.insertOne(doc);
+    }
 
     logger.info("Stored question " + doc.get("_id"));
 
@@ -212,10 +217,11 @@ public class QuestionsDAO {
       eq(new ObjectId(id))
     ).wasAcknowledged();
 
-    if (result)
+    if (result) {
       logger.info("Deleted question " + id);
-    else
+    } else {
       logger.warn("Failed to delete question " + id);
+    }
 
     return result;
   }

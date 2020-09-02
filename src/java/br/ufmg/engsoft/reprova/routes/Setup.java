@@ -6,8 +6,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
+import br.ufmg.engsoft.reprova.routes.api.Answers;
 import br.ufmg.engsoft.reprova.routes.api.Questions;
 import br.ufmg.engsoft.reprova.mime.json.Json;
+import br.ufmg.engsoft.reprova.model.Environments;
 
 
 /**
@@ -59,5 +61,12 @@ public class Setup {
     logger.info("Setting up questions route:");
     var questions = new Questions(json, questionsDAO);
     questions.setup();
+    
+    boolean answersEnabled = Environments.getInstance().getEnableAnswers(); 
+    if (answersEnabled) {
+    	var answers = new Answers();
+    	answers.setup();
+    }
+    
   }
 }

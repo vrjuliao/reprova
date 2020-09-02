@@ -21,7 +21,6 @@ public class Reprova {
 
     var questionsDAO = new QuestionsDAO(db, json);
 
-
     Setup.routes(json, questionsDAO);
   }
 }

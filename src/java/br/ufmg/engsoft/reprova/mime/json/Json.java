@@ -34,8 +34,9 @@ public class Json {
     ) {
       String[] values = json.getAsString().split("/");
 
-      if (values.length != 2)
+      if (values.length != 2) {
         throw new JsonParseException("invalid semester");
+      }
 
       var year = Integer.parseInt(values[0]);
 
@@ -75,12 +76,13 @@ public class Json {
       // Mongo's id property doesn't match Question.id:
       var _id = json.getAsJsonObject().get("_id");
 
-      if (_id != null)
+      if (_id != null) {
         questionBuilder.id(
           _id.getAsJsonObject()
             .get("$oid")
             .getAsString()
         );
+      }
 
       return questionBuilder;
     }
