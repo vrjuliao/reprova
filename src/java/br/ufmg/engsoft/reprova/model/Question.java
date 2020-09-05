@@ -136,10 +136,11 @@ public class Question {
 
       String envDifficultyGroup = System.getenv("DIFFICULTY_GROUP");
       if (envDifficultyGroup != null){
-        String[] g1 = {"Hard", "Average", "Easy"};
-        String[] g2 = {"Very Hard", "Hard", "Average", "Easy", "Very Easy"};
-
-        this.difficultyGroup = envDifficultyGroup.equals("3") ? Arrays.asList(g1) : Arrays.asList(g2);
+        if (envDifficultyGroup.equals("3")){
+          this.difficultyGroup = new DifficultyFactory(3).difficultyGroup.getDifficulties();
+        } else {
+          this.difficultyGroup = new DifficultyFactory(5).difficultyGroup.getDifficulties();
+        }
       } else {
         this.difficultyGroup = null;
       }
@@ -195,28 +196,9 @@ public class Question {
       acc += entry.getValue().values().stream().mapToDouble(Float::doubleValue).average().orElse(0);
     };
 
-    double average = acc/this.record.size();
-    if (this.difficultyGroup.size() == 3){
-      if (average < 33.3){
-        this.difficulty = this.difficultyGroup.get(0);
-      } else if (average < 66.6){
-        this.difficulty = this.difficultyGroup.get(1);
-      } else {
-        this.difficulty = this.difficultyGroup.get(2);
-      }
-    } else {
-      if (average < 20){
-        this.difficulty = this.difficultyGroup.get(0);
-      } else if (average < 40){
-        this.difficulty = this.difficultyGroup.get(1);
-      } else if (average < 60){
-        this.difficulty = this.difficultyGroup.get(2);
-      } else if (average < 80){
-        this.difficulty = this.difficultyGroup.get(3);
-      } else {
-        this.difficulty = this.difficultyGroup.get(4);
-      }
-    }
+    double avg = acc/this.record.size();
+    int difficultyIndex = new DifficultyFactory(this.difficultyGroup.size()).difficultyGroup.getDifficultyGroup(avg);
+    this.difficulty = this.difficultyGroup.get(difficultyIndex);
   }
 
 
