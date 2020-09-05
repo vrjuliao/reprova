@@ -1,4 +1,4 @@
-package br.ufmg.engsoft.reprova.model;
+package br.ufmg.engsoft.reprova.model.difficulty;
 
 public class DifficultyFactory{
   
