@@ -7,9 +7,12 @@ public class Environments {
 	
 	private boolean enableAnswers;
 	
-	private Environments() {
+	private Environments() {		
 		Optional<String> enableAnswersEnv = Optional.ofNullable(System.getenv("ENABLE_ANSWERS"));
-		enableAnswersEnv.ifPresent(enableAnswers -> this.enableAnswers = enableAnswers.equals("true"));
+		enableAnswersEnv.ifPresentOrElse(
+				enableAnswers -> this.enableAnswers = enableAnswers.equals("true"),
+				() -> this.enableAnswers = false);
+		System.out.println("ENABLE_ANSWERS: " + this.enableAnswers);
 	}
 	
 	public static Environments getInstance() {
