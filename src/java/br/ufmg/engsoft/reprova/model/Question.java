@@ -197,7 +197,7 @@ public class Question {
     };
 
     double avg = acc/this.record.size();
-    int difficultyIndex = new DifficultyFactory(this.difficultyGroup.size()).difficultyGroup.getDifficultyGroup(avg);
+    int difficultyIndex = new DifficultyFactory().getDifficulty(this.difficultyGroup.size()).getDifficultyGroup(avg);
     this.difficulty = this.difficultyGroup.get(difficultyIndex);
   }
 
