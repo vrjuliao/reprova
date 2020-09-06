@@ -6,13 +6,17 @@ public class Environments {
 	private static Environments environments;
 	
 	private boolean enableAnswers;
+	private int difficultyGroup;
 	
 	private Environments() {		
 		Optional<String> enableAnswersEnv = Optional.ofNullable(System.getenv("ENABLE_ANSWERS"));
 		enableAnswersEnv.ifPresentOrElse(
 				enableAnswers -> this.enableAnswers = enableAnswers.equals("true"),
 				() -> this.enableAnswers = false);
-		System.out.println("ENABLE_ANSWERS: " + this.enableAnswers);
+		Optional<String> envDifficultyGroup = Optional.ofNullable(System.getenv("DIFFICULTY_GROUP"));
+		envDifficultyGroup.ifPresentOrElse(
+		        difficultyGroup -> this.difficultyGroup = Integer.parseInt(envDifficultyGroup.get()),
+		        () -> this.difficultyGroup = 0);		        		        
 	}
 	
 	public static Environments getInstance() {
@@ -25,6 +29,10 @@ public class Environments {
 	
 	public boolean getEnableAnswers() {
 		return this.enableAnswers;
+	}
+	
+	public int getDifficultyGroup() {
+	    return this.difficultyGroup;
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import br.ufmg.engsoft.reprova.model.difficulty.DifficultyFactory;
 
 
 /**
@@ -98,7 +99,7 @@ public class Question {
     }
     
     public Builder difficultyGroup(List<String> difficulty){
-      this.difficultyGroup = difficultyGroup;
+      this.difficultyGroup = difficulty;
       return this;
     }
 
@@ -135,18 +136,18 @@ public class Question {
         }    
       }
       
-      String answersEnabled = System.getenv("ENABLE_ANSWERS"); 
-      if (answersEnabled != null && answersEnabled.equals("true")) {
+      Environments environments = Environments.getInstance();
+       
+      if (environments.getEnableAnswers()) {
     	  this.answers = new ArrayList<Answer>();
       }
 
-      String envDifficultyGroup = System.getenv("DIFFICULTY_GROUP");
-      if (envDifficultyGroup != null){
-        if (envDifficultyGroup.equals("3")){
-          this.difficultyGroup = new DifficultyFactory(3).difficultyGroup.getDifficulties();
-        } else {
-          this.difficultyGroup = new DifficultyFactory(5).difficultyGroup.getDifficulties();
-        }
+      if (environments.getDifficultyGroup() != 0) {
+    	// TODO validate possible values (3 and 5)
+    	int valueDifficultyGroup = environments.getDifficultyGroup();
+    	this.difficultyGroup = new DifficultyFactory()
+    								.getDifficulty(valueDifficultyGroup)
+    								.getDifficulties();
       } else {
         this.difficultyGroup = null;
       }
@@ -205,7 +206,9 @@ public class Question {
     };
 
     double avg = acc/this.record.size();
-    int difficultyIndex = new DifficultyFactory().difficultyGroup.getDifficultyGroup(avg);
+    int difficultyIndex = new DifficultyFactory()
+                                .getDifficulty(this.difficultyGroup.size())
+                                .getDifficultyGroup(avg);
     this.difficulty = this.difficultyGroup.get(difficultyIndex);
   }
 
