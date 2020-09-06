@@ -50,8 +50,8 @@ function table_build_section(rows, container_elem, row_elem, cell_elem) {
 function questionsTable(data) {
   const headers = [
     [ { text: 'Questions', colSpan: '5' } ],
-    token ? [ 'Description', 'Theme', 'Record', 'Private', 'Actions' ]
-          : [ 'Description', 'Theme', 'Difficulty', 'Actions' ]
+    token ? [ 'Description', 'Theme', 'Record', 'Private', 'Difficulty', 'Estimated Time', 'Actions' ]
+          : [ 'Description', 'Theme', 'Difficulty', 'Estimated Time', 'Actions' ]
   ];
   const rows = data.map(
     q => {
@@ -111,24 +111,15 @@ function questionsTable(data) {
           q.theme,
           { elem: record },
           q.pvt,
+          q.difficulty,
           { elem: actions }
         ];
       }
       else {
-        const record = mean(
-          Object
-            .values(q.record)
-            .flatMap(Object.values)
-        );
-
-        const difficulty = record < 33.3 ? 'Hard'
-                         : record < 66.6 ? 'Medium'
-                         : 'Easy';
-
         return [
           { elem: description },
           q.theme,
-          difficulty,
+          q.difficulty,
           { elem: actions }
         ];
       }
