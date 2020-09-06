@@ -9,6 +9,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
+import br.ufmg.engsoft.reprova.model.Questionnaire;
 import br.ufmg.engsoft.reprova.model.Question;
 import br.ufmg.engsoft.reprova.model.Semester;
 
@@ -86,6 +87,46 @@ public class Json {
     }
   }
 
+  /**
+   * Deserializer for Questionnaire.Builder.
+   */
+  protected static class QuestionnaireBuilderDeserializer
+    implements JsonDeserializer<Questionnaire.Builder>
+  {
+    @Override
+    public Questionnaire.Builder deserialize(
+      JsonElement json,
+      Type typeOfT,
+      JsonDeserializationContext context
+    ) {
+      var parserBuilder = new GsonBuilder();
+
+      parserBuilder.registerTypeAdapter( // Questionnaire has Question fields.
+        Question.Builder.class,
+        new QuestionBuilderDeserializer()
+      );
+
+      var questionnaireBuilder = parserBuilder
+        .create()
+        .fromJson(
+          json.getAsJsonObject(),
+          Questionnaire.Builder.class
+        );
+
+      // Mongo's id property doesn't match Questionnaire.id:
+      var _id = json.getAsJsonObject().get("_id");
+
+      if (_id != null)
+        questionnaireBuilder.id(
+          _id.getAsJsonObject()
+            .get("$oid")
+            .getAsString()
+        );
+
+      return questionnaireBuilder;
+    }
+  }
+
 
 
   /**
@@ -105,6 +146,11 @@ public class Json {
     parserBuilder.registerTypeAdapter(
       Question.Builder.class,
       new QuestionBuilderDeserializer()
+    );
+
+    parserBuilder.registerTypeAdapter(
+      Questionnaire.Builder.class,
+      new QuestionnaireBuilderDeserializer()
     );
 
     this.gson = parserBuilder.create();

@@ -198,8 +198,6 @@ public class Questions {
       return invalid;
     }
 
-    question.calculateDifficulty();
-
     logger.info("Parsed " + question.toString());
     logger.info("Adding question.");
 
