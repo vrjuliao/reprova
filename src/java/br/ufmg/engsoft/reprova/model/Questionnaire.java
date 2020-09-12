@@ -128,19 +128,20 @@ public class Questionnaire{
         int easierDifficultyIndex = this.difficultyGroup.indexOf(this.averageDifficulty);
         int harderDifficultyIndex = easierDifficultyIndex;
         while (remainingQuestionsCount > 0){
-          System.out.println("Iteration");
-          if (harderDifficultyIndex == this.difficultyGroup.size()-1){
+          if (harderDifficultyIndex == 0){
             easierQuestionsCount += harderQuestionsCount;
             harderQuestionsCount = -1;
+            harderDifficultyIndex = -1;
           } else {
-            harderDifficultyIndex++;
+            harderDifficultyIndex--;
           }
           
-          if (easierDifficultyIndex == 0){
+          if (easierDifficultyIndex == this.difficultyGroup.size()-1){
             harderQuestionsCount += easierQuestionsCount;
             easierQuestionsCount = -1;
+            easierDifficultyIndex = -1;
           } else {
-            easierDifficultyIndex--;
+            easierDifficultyIndex++;
           }
 
           if (harderQuestionsCount != -1){
