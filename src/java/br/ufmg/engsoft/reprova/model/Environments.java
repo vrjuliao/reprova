@@ -7,16 +7,19 @@ public class Environments {
 	
 	private boolean enableAnswers;
 	private int difficultyGroup;
+	private String token;
 	
 	private Environments() {		
 		Optional<String> enableAnswersEnv = Optional.ofNullable(System.getenv("ENABLE_ANSWERS"));
 		enableAnswersEnv.ifPresentOrElse(
-				enableAnswers -> this.enableAnswers = enableAnswers.equals("true"),
+				enableAnswers -> this.enableAnswers = enableAnswers.toLowerCase().equals("true"),
 				() -> this.enableAnswers = false);
 		Optional<String> envDifficultyGroup = Optional.ofNullable(System.getenv("DIFFICULTY_GROUP"));
 		envDifficultyGroup.ifPresentOrElse(
 		        difficultyGroup -> this.difficultyGroup = Integer.parseInt(envDifficultyGroup.get()),
-		        () -> this.difficultyGroup = 0);		        		        
+		        () -> this.difficultyGroup = 0);
+		
+		this.token = System.getenv("REPROVA_TOKEN");
 	}
 	
 	public static Environments getInstance() {
@@ -33,6 +36,10 @@ public class Environments {
 	
 	public int getDifficultyGroup() {
 	    return this.difficultyGroup;
+	}
+	
+	public String getToken() {
+	    return this.token;
 	}
 
 }

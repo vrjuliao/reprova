@@ -1,7 +1,5 @@
 package br.ufmg.engsoft.reprova.model;
 
-// TODO: Create a separate HTML page to add answers
-
 public class Answer {
 	/**
 	 * Unique id of the answer
@@ -33,6 +31,10 @@ public class Answer {
 	
 	public String getAttachment() {
 		return this.attachment;
+	}
+	
+	public boolean getPvt() {
+	    return this.pvt;
 	}
 	
 	public Answer(String description, String attachment, boolean pvt) {

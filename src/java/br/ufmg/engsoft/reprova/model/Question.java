@@ -1,7 +1,6 @@
 package br.ufmg.engsoft.reprova.model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -102,6 +101,11 @@ public class Question {
       this.difficultyGroup = difficulty;
       return this;
     }
+    
+    public Builder answers(List<Answer> answers) {
+        this.answers = answers;
+        return this;
+    }
 
 
     /**
@@ -188,6 +192,7 @@ public class Question {
     this.pvt = pvt;
     this.difficulty = difficulty;
     this.difficultyGroup = difficultyGroup;
+    this.answers = answers;
   }
 
 
@@ -268,6 +273,7 @@ public class Question {
     builder.append("  pvt: " + this.pvt + "\n");
     builder.append("  difficulty: " + this.difficulty + "\n");
     builder.append("  difficultyGroup: " + this.difficultyGroup + "\n");
+    
     if (this.statement != null) {
       builder.append(
         "  head: " +
@@ -278,6 +284,11 @@ public class Question {
         "\n"
       );
     }
+    
+    if (this.answers != null) {
+        builder.append("  answers: <INSERT CONTENT HERE\n");
+    }
+    
 
     return builder.toString();
   }
