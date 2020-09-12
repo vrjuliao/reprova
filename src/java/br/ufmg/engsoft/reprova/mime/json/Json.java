@@ -105,6 +105,11 @@ public class Json {
         Question.Builder.class,
         new QuestionBuilderDeserializer()
       );
+      
+      parserBuilder.registerTypeAdapter( // Question has a Semester field.
+        Semester.class,
+        new SemesterDeserializer()
+      );
 
       var questionnaireBuilder = parserBuilder
         .create()
@@ -124,6 +129,51 @@ public class Json {
         );
 
       return questionnaireBuilder;
+    }
+  }
+
+  /**
+   * Deserializer for Questionnaire.Generator.
+   */
+  protected static class QuestionnaireGeneratorDeserializer
+    implements JsonDeserializer<Questionnaire.Generator>
+  {
+    @Override
+    public Questionnaire.Generator deserialize(
+      JsonElement json,
+      Type typeOfT,
+      JsonDeserializationContext context
+    ) {
+      var parserBuilder = new GsonBuilder();
+
+      parserBuilder.registerTypeAdapter( // Questionnaire has Question fields.
+        Question.Builder.class,
+        new QuestionBuilderDeserializer()
+      );
+      
+      parserBuilder.registerTypeAdapter( // Question has a Semester field.
+        Semester.class,
+        new SemesterDeserializer()
+      );
+
+      var questionnaireGenerator = parserBuilder
+        .create()
+        .fromJson(
+          json.getAsJsonObject(),
+          Questionnaire.Generator.class
+        );
+
+      // Mongo's id property doesn't match Questionnaire.id:
+      var _id = json.getAsJsonObject().get("_id");
+
+      if (_id != null)
+        questionnaireGenerator.id(
+          _id.getAsJsonObject()
+            .get("$oid")
+            .getAsString()
+        );
+
+      return questionnaireGenerator;
     }
   }
 
@@ -151,6 +201,11 @@ public class Json {
     parserBuilder.registerTypeAdapter(
       Questionnaire.Builder.class,
       new QuestionnaireBuilderDeserializer()
+    );
+    
+    parserBuilder.registerTypeAdapter(
+      Questionnaire.Generator.class,
+      new QuestionnaireGeneratorDeserializer()
     );
 
     this.gson = parserBuilder.create();

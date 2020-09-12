@@ -79,11 +79,13 @@ public class Questionnaires {
    * Methods:
    * - get
    * - post
+   * - generate
    * - delete
    */
   public void setup() {
     Spark.get("/api/questionnaires", this::get);
     Spark.post("/api/questionnaires", this::post);
+    Spark.post("/api/questionnaires/generate", this::generate);
     Spark.delete("/api/questionnaires", this::delete);
 
     logger.info("Setup /api/questionnaires.");
@@ -212,6 +214,56 @@ public class Questionnaires {
                      
       questionsDAO.add(question);
     }
+
+    response.status(
+       success ? 200
+               : 400
+    );
+
+    logger.info("Done. Responding...");
+
+    return ok;
+  }
+
+  /**
+   * Generate endpoint: create a questionnaire in the database.
+   * The parameters for the questionnaire's generation must be supplied in the request's body.
+   * Such parameters must include the averageDifficulty and may include totalEstimatedTime.
+   * This endpoint is for authorized access only.
+   */
+  protected Object generate(Request request, Response response){
+    String body = request.body();
+
+    logger.info("Received questionnaires post:" + body);
+
+    response.type("application/json");
+
+    var token = request.queryParams("token");
+
+    if (!authorized(token)) {
+      logger.info("Unauthorized token: " + token);
+      response.status(403);
+      return unauthorized;
+    }
+
+    Questionnaire questionnaire;
+    try {
+      questionnaire = json
+        .parse(body, Questionnaire.Generator.class)
+        .generate(questionsDAO);
+    }
+    catch (Exception e) {
+      logger.error("Invalid request payload!", e);
+      response.status(400);
+      return invalid;
+    }
+
+    logger.info("Generated " + questionnaire.toString());
+    logger.info("Adding questionnaire.");
+
+    var success = questionnairesDAO.add(questionnaire);
+
+    logger.info("Added questionnaire.");
 
     response.status(
        success ? 200

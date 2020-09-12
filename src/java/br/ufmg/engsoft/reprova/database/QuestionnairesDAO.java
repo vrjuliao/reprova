@@ -173,6 +173,8 @@ public class QuestionnairesDAO {
     }
 
     Document doc = new Document()
+        .append("averageDifficulty", questionnaire.averageDifficulty)
+        .append("totalEstimatedTime", questionnaire.totalEstimatedTime)
         .append("questions", questions);
     
     var id = questionnaire.id;
