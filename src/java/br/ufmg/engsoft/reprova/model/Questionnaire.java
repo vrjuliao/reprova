@@ -64,18 +64,18 @@ public class Questionnaire{
     private List<Question> getQuestionsOfDifficulty(int count, String difficulty){
       List<Question> questions = new ArrayList<Question>();
       List<Question> questionsOfDifficulty = this.allQuestions.stream()
-                                          .filter(q -> q.difficulty == difficulty)
+                                          .filter(q -> q.difficulty.equals(difficulty))
                                           .collect(Collectors.toList());
 
-        Collections.shuffle(questionsOfDifficulty);
-        for (int i = 0; i < count; i++){
-          if (i >= questionsOfDifficulty.size()){
-            break;
-          }
-          questions.add(questionsOfDifficulty.get(i));
+      Collections.shuffle(questionsOfDifficulty);
+      for (int i = 0; i < count; i++){
+        if (i >= questionsOfDifficulty.size()){
+          break;
         }
+        questions.add(questionsOfDifficulty.get(i));
+      }
 
-        return questions;
+      return questions;
     }
 
     /**
@@ -84,20 +84,20 @@ public class Questionnaire{
      * Calls the Questionnaire's Builder.
      */
     public Questionnaire generate(QuestionsDAO questionsDAO){
+      String envDifficultyGroup = System.getenv("DIFFICULTY_GROUP");
+      if (envDifficultyGroup != null){
+        if (envDifficultyGroup.equals("3")){
+          this.difficultyGroup = new DifficultyFactory(3).difficultyGroup.getDifficulties();
+        } else {
+          this.difficultyGroup = new DifficultyFactory(5).difficultyGroup.getDifficulties();
+        }
+      } else {
+        this.difficultyGroup = null;
+      }
+
       if (this.averageDifficulty == null){
         this.averageDifficulty = "Average";
       } else {
-        String envDifficultyGroup = System.getenv("DIFFICULTY_GROUP");
-        if (envDifficultyGroup != null){
-          if (envDifficultyGroup.equals("3")){
-            this.difficultyGroup = new DifficultyFactory(3).difficultyGroup.getDifficulties();
-          } else {
-            this.difficultyGroup = new DifficultyFactory(5).difficultyGroup.getDifficulties();
-          }
-        } else {
-          this.difficultyGroup = null;
-        }
-
         if (!this.difficultyGroup.contains(this.averageDifficulty)){
           throw new IllegalArgumentException("invalid average difficulty");
         }
@@ -128,6 +128,7 @@ public class Questionnaire{
         int easierDifficultyIndex = this.difficultyGroup.indexOf(this.averageDifficulty);
         int harderDifficultyIndex = easierDifficultyIndex;
         while (remainingQuestionsCount > 0){
+          System.out.println("Iteration");
           if (harderDifficultyIndex == this.difficultyGroup.size()-1){
             easierQuestionsCount += harderQuestionsCount;
             harderQuestionsCount = -1;
@@ -145,14 +146,14 @@ public class Questionnaire{
           if (harderQuestionsCount != -1){
             List<Question> harderQuestions = getQuestionsOfDifficulty(harderQuestionsCount, this.difficultyGroup.get(harderDifficultyIndex));
             harderQuestionsCount -= harderQuestions.size();
-            remainingQuestionsCount -= harderQuestionsCount;
+            remainingQuestionsCount -= harderQuestions.size();
             questions.addAll(harderQuestions);
           }
 
           if (easierQuestionsCount != -1){
             List<Question> easierQuestions = getQuestionsOfDifficulty(easierQuestionsCount, this.difficultyGroup.get(easierDifficultyIndex));
             easierQuestionsCount -= easierQuestions.size();
-            remainingQuestionsCount -= easierQuestionsCount;
+            remainingQuestionsCount -= easierQuestions.size();
             questions.addAll(easierQuestions);
           }
         }

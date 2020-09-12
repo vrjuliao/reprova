@@ -181,7 +181,6 @@ public class QuestionsDAO {
       .append("record", record == null ? null : new Document(record))
       .append("pvt", question.pvt)
       .append("difficulty", question.difficulty);
-    System.out.println(question.difficulty);
 
     var id = question.id;
     if (id != null) {

@@ -187,9 +187,7 @@ public class Question {
    * Should be called when changes are made to the record.
    */
   public void calculateDifficulty(){
-    System.out.println("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
     if (this.difficultyGroup == null){
-      System.out.println("fodeu");
       return;
     }
 
@@ -199,7 +197,6 @@ public class Question {
     };
 
     double avg = acc/this.record.size();
-    System.out.println(avg);
     int difficultyIndex = new DifficultyFactory(this.difficultyGroup.size()).difficultyGroup.getDifficultyGroup(avg);
     this.difficulty = this.difficultyGroup.get(difficultyIndex);
   }

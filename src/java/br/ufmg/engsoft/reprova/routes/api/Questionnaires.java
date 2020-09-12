@@ -7,6 +7,8 @@ import spark.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+
 import br.ufmg.engsoft.reprova.database.QuestionnairesDAO;
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
 import br.ufmg.engsoft.reprova.model.Question;
@@ -87,6 +89,7 @@ public class Questionnaires {
     Spark.post("/api/questionnaires", this::post);
     Spark.post("/api/questionnaires/generate", this::generate);
     Spark.delete("/api/questionnaires", this::delete);
+    Spark.delete("/api/questionnaires/deleteAll", this::deleteAll);
 
     logger.info("Setup /api/questionnaires.");
   }
@@ -209,6 +212,7 @@ public class Questionnaires {
                      .theme(question.theme)
                      .description(question.description)
                      .statement(question.statement)
+                     .record(question.record)
                      .pvt(question.pvt)
                      .build();
                      
@@ -304,6 +308,47 @@ public class Questionnaires {
     logger.info("Deleting questionnaire " + id);
 
     var success = questionnairesDAO.remove(id);
+
+    logger.info("Done. Responding...");
+
+    response.status(
+      success ? 200
+              : 400
+    );
+
+    return ok;
+  }
+
+  /**
+   * Delete All endpoint: remove all questionnaires from the database.
+   * This endpoint is for authorized access only.
+   */
+  protected Object deleteAll(Request request, Response response) {
+    logger.info("Received questionnaires delete all:");
+
+    response.type("application/json");
+
+    var token = request.queryParams("token");
+
+    if (!authorized(token)) {
+      logger.info("Unauthorized token: " + token);
+      response.status(403);
+      return unauthorized;
+    }
+
+    logger.info("Deleting all questionnaires");
+
+    boolean success = false;
+    ArrayList<Questionnaire> questionnaires = new ArrayList<Questionnaire>(questionnairesDAO.list());
+    for (Questionnaire questionnaire : questionnaires){
+      String id = questionnaire.id;
+      logger.info("Deleting questionnaire " + id);
+      
+      success = questionnairesDAO.remove(id);
+      if (!success){
+        break;
+      }
+    }
 
     logger.info("Done. Responding...");
 
