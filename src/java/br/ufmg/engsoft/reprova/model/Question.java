@@ -33,7 +33,7 @@ public class Question {
   /**
    * The record of the question per semester per class. Mustn't be null, may be empty.
    */
-  public final Map<Semester, Map<String, Float>> record;
+  public final Map<Semester, Map<String, Map<String, Float>>> record;
   /**
    * Whether the question is private.
    */
@@ -49,7 +49,6 @@ public class Question {
   /**
    * The grade for each student that took the question.
    */
-  private final Map<String,Double> studentsGrade;
 
   /**
    * Builder for Question.
@@ -59,11 +58,10 @@ public class Question {
     protected String theme;
     protected String description;
     protected String statement;
-    protected Map<Semester, Map<String, Float>> record;
+    protected Map<Semester, Map<String, Map<String, Float>>> record;
     protected boolean pvt = true;
     protected String difficulty;
     protected List<String> difficultyGroup;
-    protected Map<String,Double> studentsGrade;
     
 
     public Builder id(String id) {
@@ -86,7 +84,7 @@ public class Question {
       return this;
     }
 
-    public Builder record(Map<Semester, Map<String, Float>> record) {
+    public Builder record(Map<Semester, Map<String, Map<String, Float>>> record) {
       this.record = record;
       return this;
     }
@@ -106,10 +104,7 @@ public class Question {
       return this;
     }
     
-    public Builder studentsGrade(Map<String,Double> studentsGrade) {
-    	this.studentsGrade = studentsGrade;
-    	return this;
-    }
+
 
     /**
      * Build the question.
@@ -133,7 +128,7 @@ public class Question {
       }
 
       if (this.record == null) {
-        this.record = new HashMap<Semester, Map<String, Float>>();
+        this.record = new HashMap<Semester, Map<String, Map<String, Float>>>();
       } else {
         // All inner maps mustn't be null:
         for (var entry : this.record.entrySet()) {
@@ -143,19 +138,7 @@ public class Question {
         }    
       }
       
-      if(this.studentsGrade == null) {
-    	  this.studentsGrade = new HashMap<String,Double>();
-    	  this.studentsGrade.put("2016006913", 21.0);
-    	  this.studentsGrade.put("2016006915", 25.0);
-    	  this.studentsGrade.put("2016006914", 24.0);
-    	  this.studentsGrade.put("2016006916", 4.0);
-      } else {
-    	  for(var entry: this.studentsGrade.entrySet()) {
-    		  if(entry.getValue() == null) {
-    			  throw new IllegalArgumentException("inner student grade mustn't be null");
-    		  }
-    	  }
-      }
+     
       
       Environments environments = Environments.getInstance();
 
@@ -177,8 +160,7 @@ public class Question {
         this.record,
         this.pvt,
         this.difficulty,
-        this.difficultyGroup,
-        this.studentsGrade
+        this.difficultyGroup
       );
     }
   }
@@ -191,11 +173,10 @@ public class Question {
     String theme,
     String description,
     String statement,
-    Map<Semester, Map<String, Float>> record,
+    Map<Semester, Map<String, Map<String, Float>>> record,
     boolean pvt,
     String difficulty,
-    List<String> difficultyGroup,
-    Map<String,Double> studentsGrade
+    List<String> difficultyGroup
   ) {
     this.id = id;
     this.theme = theme;
@@ -205,36 +186,59 @@ public class Question {
     this.pvt = pvt;
     this.difficulty = difficulty;
     this.difficultyGroup = difficultyGroup;
-    this.studentsGrade = studentsGrade;
   }
 
 
   /* Calculate Grades Average */
   public double calculateGradeAverage() {
-	  double sum = 0.0;
-	  for(var value: this.studentsGrade.values()) {
-		  sum += value;
-	  }
-	  return sum/this.studentsGrade.size();
+	  double acc = 0;
+	    for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
+	      double acc2 = 0;
+	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()){
+	        acc2 += innerEntry.getValue().values().stream().mapToDouble(Float::doubleValue).average().orElse(0);
+	      }
+	      acc += acc2/entry.getValue().entrySet().size();
+	    }
+
+	    return acc/this.record.size();
   }
   
+  /* Calculate Grades Standart Deviation */
   public double calculateGradeStandardDeviation() {
 	  double average = this.calculateGradeAverage();
 	  double sum = 0.0;
-	  for(var value: this.studentsGrade.values()) {
-		  sum += Math.pow(value - average, 2.0);
-	  }
-	  double stdDev = Math.sqrt(sum/(this.studentsGrade.size() - 1));
+	  int qtdNotas = 0;
+	  
+	  for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
+	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()){
+	        for(var notas: innerEntry.getValue().values()) {
+	        	sum += Math.pow(notas - average, 2);
+	        	qtdNotas++;
+	        }
+	      }
+	    }
+	  
+	  double stdDev = Math.sqrt(sum/(qtdNotas - 1));
+
 	  return stdDev;
   }
   
+  /* Calculate Grades Median */
   public double calculateGradeMedian() {
-	  List<Double> gradeList = new ArrayList<Double>();
-	  for(var value: this.studentsGrade.values()) {
-		  gradeList.add(value);
-	  }
-	  Collections.sort(gradeList);
+	  List<Float> gradeList = new ArrayList<Float>();
 	  
+	  for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
+	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()){
+	        for(var notas: innerEntry.getValue().values()) {
+	        	gradeList.add(notas);
+	        }
+	      }
+	    }
+	  
+	  Collections.sort(gradeList);
+	  if(gradeList.size() == 0) {
+		  return 0.0;
+	  }
 	  int i = gradeList.size()/2;
 	  if(gradeList.size() % 2 == 0) {
 		  return (gradeList.get(i-1) + gradeList.get(i))/2;
@@ -255,12 +259,8 @@ public class Question {
       return;
     }
 
-    double acc = 0;
-    for (Map.Entry<Semester, Map<String, Float>> entry : this.record.entrySet()) {
-      acc += entry.getValue().values().stream().mapToDouble(Float::doubleValue).average().orElse(0);
-    };
-
-    double avg = acc/this.record.size();
+    double avg = calculateGradeAverage();
+    
     int difficultyIndex = new DifficultyFactory()
                                 .getDifficulty(this.difficultyGroup.size())
                                 .getDifficultyGroup(avg);
@@ -290,8 +290,7 @@ public class Question {
         && this.statement.equals(question.statement)
         && this.record.equals(question.record)
         && this.pvt == question.pvt
-        && this.difficulty.equals(question.difficulty)
-        && this.studentsGrade.equals(question.studentsGrade);
+        && this.difficulty.equals(question.difficulty);
   }
 
 
@@ -304,8 +303,7 @@ public class Question {
       this.statement,
       this.record,
       this.pvt,
-      this.difficulty,
-      this.studentsGrade
+      this.difficulty
     );
   }
 
@@ -325,7 +323,6 @@ public class Question {
     builder.append("  pvt: " + this.pvt + "\n");
     builder.append("  difficulty: " + this.difficulty + "\n");
     builder.append("  difficultyGroup: " + this.difficultyGroup + "\n");
-    builder.append("  studentsGrade: " + this.studentsGrade + "\n");
     
     if (this.statement != null) {
       builder.append(
