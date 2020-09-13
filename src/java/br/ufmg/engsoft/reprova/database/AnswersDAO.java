@@ -3,7 +3,6 @@ package br.ufmg.engsoft.reprova.database;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -21,7 +20,6 @@ import org.slf4j.LoggerFactory;
 
 import br.ufmg.engsoft.reprova.mime.json.Json;
 import br.ufmg.engsoft.reprova.model.Answer;
-import br.ufmg.engsoft.reprova.model.Question;
 
 
 /**

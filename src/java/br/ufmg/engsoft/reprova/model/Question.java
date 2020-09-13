@@ -46,8 +46,6 @@ public class Question {
    */
   private final List<String> difficultyGroup;
 
-  private List<Answer> answers;
-
   /**
    * Builder for Question.
    */
@@ -192,7 +190,6 @@ public class Question {
     this.pvt = pvt;
     this.difficulty = difficulty;
     this.difficultyGroup = difficultyGroup;
-    this.answers = answers;
   }
 
 
@@ -283,10 +280,6 @@ public class Question {
         ) +
         "\n"
       );
-    }
-    
-    if (this.answers != null) {
-        builder.append("  answers: <INSERT CONTENT HERE\n");
     }
     
 
