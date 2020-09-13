@@ -4,6 +4,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+
+import br.ufmg.engsoft.reprova.model.difficulty.DifficultyFactory;
+
 import java.util.List;
 
 
@@ -96,7 +99,7 @@ public class Question {
     }
     
     public Builder difficultyGroup(List<String> difficulty){
-      this.difficultyGroup = difficultyGroup;
+      this.difficultyGroup = difficulty;
       return this;
     }
 
@@ -136,11 +139,11 @@ public class Question {
 
       String envDifficultyGroup = System.getenv("DIFFICULTY_GROUP");
       if (envDifficultyGroup != null){
-        if (envDifficultyGroup.equals("3")){
-          this.difficultyGroup = new DifficultyFactory(3).difficultyGroup.getDifficulties();
-        } else {
-          this.difficultyGroup = new DifficultyFactory(5).difficultyGroup.getDifficulties();
-        }
+    	// TODO validate possible values (3 and 5)
+    	int valueDifficultyGroup = Integer.parseInt(envDifficultyGroup);
+    	this.difficultyGroup = new DifficultyFactory()
+    								.getDifficulty(valueDifficultyGroup)
+    								.getDifficulties();
       } else {
         this.difficultyGroup = null;
       }
@@ -197,7 +200,7 @@ public class Question {
     };
 
     double avg = acc/this.record.size();
-    int difficultyIndex = new DifficultyFactory(this.difficultyGroup.size()).difficultyGroup.getDifficultyGroup(avg);
+    int difficultyIndex = new DifficultyFactory().getDifficulty(this.difficultyGroup.size()).getDifficultyGroup(avg);
     this.difficulty = this.difficultyGroup.get(difficultyIndex);
   }
 
