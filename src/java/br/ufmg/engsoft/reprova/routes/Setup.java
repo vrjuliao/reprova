@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
 import br.ufmg.engsoft.reprova.routes.api.Questions;
+import br.ufmg.engsoft.reprova.database.QuestionnairesDAO;
+import br.ufmg.engsoft.reprova.routes.api.Questionnaires;
 import br.ufmg.engsoft.reprova.mime.json.Json;
 
 
@@ -37,15 +39,20 @@ public class Setup {
    * and also static files on '/public'.
    * @param json          the json formatter
    * @param questionsDAO  the DAO for Question
+   * @param questionnairesDAO  the DAO for Questionnaire
    * @throws IllegalArgumentException  if any parameter is null
    */
-  public static void routes(Json json, QuestionsDAO questionsDAO) {
+  public static void routes(Json json, QuestionsDAO questionsDAO, QuestionnairesDAO questionnairesDAO) {
     if (json == null) {
       throw new IllegalArgumentException("json mustn't be null");
     }
 
     if (questionsDAO == null) {
       throw new IllegalArgumentException("questionsDAO mustn't be null");
+    }
+
+    if (questionnairesDAO == null) {
+      throw new IllegalArgumentException("questionnairesDAO mustn't be null");
     }
 
 
@@ -59,5 +66,9 @@ public class Setup {
     logger.info("Setting up questions route:");
     var questions = new Questions(json, questionsDAO);
     questions.setup();
+
+    logger.info("Setting up questionnaires route:");
+    var questionnaires = new Questionnaires(json, questionnairesDAO, questionsDAO);
+    questionnaires.setup();
   }
 }
