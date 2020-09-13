@@ -3,14 +3,10 @@ package br.ufmg.engsoft.reprova.database;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Collection;
-import java.util.Objects;
-import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import com.mongodb.client.MongoCollection;
 import static com.mongodb.client.model.Filters.eq;
-import static com.mongodb.client.model.Filters.and;
-import static com.mongodb.client.model.Projections.exclude;
 import static com.mongodb.client.model.Projections.fields;
 
 import org.bson.Document;
@@ -21,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import br.ufmg.engsoft.reprova.mime.json.Json;
 import br.ufmg.engsoft.reprova.model.Questionnaire;
-import br.ufmg.engsoft.reprova.database.QuestionsDAO;
 
 
 /**

@@ -1,13 +1,10 @@
 package br.ufmg.engsoft.reprova.model;
 
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
 import br.ufmg.engsoft.reprova.model.difficulty.DifficultyFactory;
-
-import java.util.List;
 
 
 /**
@@ -47,8 +44,6 @@ public class Question {
    * The difficulty's possible values.
    */
   private final List<String> difficultyGroup;
-
-
 
   /**
    * Builder for Question.
@@ -103,7 +98,6 @@ public class Question {
       return this;
     }
 
-
     /**
      * Build the question.
      * @throws IllegalArgumentException  if any parameter is invalid
@@ -127,8 +121,7 @@ public class Question {
 
       if (this.record == null) {
         this.record = new HashMap<Semester, Map<String, Float>>();
-      }
-      else {
+      } else {
         // All inner maps mustn't be null:
         for (var entry : this.record.entrySet()) {
         	if (entry.getValue() == null) {
@@ -136,11 +129,12 @@ public class Question {
         	}
         }    
       }
+      
+      Environments environments = Environments.getInstance();
 
-      String envDifficultyGroup = System.getenv("DIFFICULTY_GROUP");
-      if (envDifficultyGroup != null){
+      if (environments.getDifficultyGroup() != 0) {
     	// TODO validate possible values (3 and 5)
-    	int valueDifficultyGroup = Integer.parseInt(envDifficultyGroup);
+    	int valueDifficultyGroup = environments.getDifficultyGroup();
     	this.difficultyGroup = new DifficultyFactory()
     								.getDifficulty(valueDifficultyGroup)
     								.getDifficulties();
@@ -200,7 +194,9 @@ public class Question {
     };
 
     double avg = acc/this.record.size();
-    int difficultyIndex = new DifficultyFactory().getDifficulty(this.difficultyGroup.size()).getDifficultyGroup(avg);
+    int difficultyIndex = new DifficultyFactory()
+                                .getDifficulty(this.difficultyGroup.size())
+                                .getDifficultyGroup(avg);
     this.difficulty = this.difficultyGroup.get(difficultyIndex);
   }
 
@@ -260,6 +256,7 @@ public class Question {
     builder.append("  pvt: " + this.pvt + "\n");
     builder.append("  difficulty: " + this.difficulty + "\n");
     builder.append("  difficultyGroup: " + this.difficultyGroup + "\n");
+    
     if (this.statement != null) {
       builder.append(
         "  head: " +
@@ -270,6 +267,7 @@ public class Question {
         "\n"
       );
     }
+    
 
     return builder.toString();
   }

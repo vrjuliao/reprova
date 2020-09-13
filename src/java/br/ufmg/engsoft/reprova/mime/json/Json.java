@@ -9,6 +9,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
+import br.ufmg.engsoft.reprova.model.Answer;
 import br.ufmg.engsoft.reprova.model.Questionnaire;
 import br.ufmg.engsoft.reprova.model.Question;
 import br.ufmg.engsoft.reprova.model.Semester;
@@ -35,8 +36,9 @@ public class Json {
     ) {
       String[] values = json.getAsString().split("/");
 
-      if (values.length != 2)
+      if (values.length != 2) {
         throw new JsonParseException("invalid semester");
+      }
 
       var year = Integer.parseInt(values[0]);
 
@@ -76,17 +78,53 @@ public class Json {
       // Mongo's id property doesn't match Question.id:
       var _id = json.getAsJsonObject().get("_id");
 
-      if (_id != null)
+      if (_id != null) {
         questionBuilder.id(
           _id.getAsJsonObject()
             .get("$oid")
             .getAsString()
         );
+      }
 
       return questionBuilder;
     }
   }
+  
+  /**
+   * Deserializer for Answer.Builder.
+   */
+  protected static class AnswerBuilderDeserializer
+    implements JsonDeserializer<Answer.Builder> {
+    @Override
+    public Answer.Builder deserialize(
+      JsonElement json,
+      Type typeOfT,
+      JsonDeserializationContext context
+    ) {
+      var parserBuilder = new GsonBuilder();
 
+
+      var answerBuilder = parserBuilder
+        .create()
+        .fromJson(
+          json.getAsJsonObject(),
+          Answer.Builder.class
+        );
+
+        // Mongo's id property doesn't match Question.id:
+        var _id = json.getAsJsonObject().get("_id");
+
+        if (_id != null) {
+          answerBuilder.id(
+            _id.getAsJsonObject()
+              .get("$oid")
+              .getAsString()
+          );
+        }
+
+        return answerBuilder;
+      }
+    }
   /**
    * Deserializer for Questionnaire.Builder.
    */
@@ -177,14 +215,10 @@ public class Json {
     }
   }
 
-
-
   /**
    * The json formatter.
    */
   protected final Gson gson;
-
-
 
   /**
    * Instantiate the formatter for Reprova's types.
@@ -196,6 +230,11 @@ public class Json {
     parserBuilder.registerTypeAdapter(
       Question.Builder.class,
       new QuestionBuilderDeserializer()
+    );
+    
+    parserBuilder.registerTypeAdapter(
+      Answer.Builder.class,
+      new AnswerBuilderDeserializer()
     );
 
     parserBuilder.registerTypeAdapter(

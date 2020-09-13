@@ -4,11 +4,6 @@ import spark.Spark;
 import spark.Request;
 import spark.Response;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,29 +11,18 @@ import java.util.ArrayList;
 
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
 import br.ufmg.engsoft.reprova.model.Question;
+import br.ufmg.engsoft.reprova.model.ReprovaRoute;
 import br.ufmg.engsoft.reprova.mime.json.Json;
 
 
 /**
  * Questions route.
  */
-public class Questions {
+public class Questions extends ReprovaRoute {
   /**
    * Logger instance.
    */
   protected static final Logger logger = LoggerFactory.getLogger(Questions.class);
-
-  /**
-   * Access token.
-   */
-  protected static final String token = System.getenv("REPROVA_TOKEN");
-
-  /**
-   * Messages.
-   */
-  protected static final String unauthorized = "\"Unauthorized\"";
-  protected static final String invalid = "\"Invalid request\"";
-  protected static final String ok = "\"Ok\"";
 
 
   /**
@@ -85,13 +69,6 @@ public class Questions {
     Spark.delete("/api/questions/deleteAll", this::deleteAll);
 
     logger.info("Setup /api/questions.");
-  }
-
-  /**
-   * Check if the given token is authorized.
-   */
-  protected static boolean authorized(String token) {
-    return Questions.token.equals(token);
   }
 
   /**
