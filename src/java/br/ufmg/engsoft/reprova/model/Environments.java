@@ -8,6 +8,7 @@ public class Environments {
 	private boolean enableAnswers;
 	private int difficultyGroup;
 	private String token;
+	private int port;
 	
 	private Environments() {		
 		Optional<String> enableAnswersEnv = Optional.ofNullable(System.getenv("ENABLE_ANSWERS"));
@@ -18,6 +19,7 @@ public class Environments {
 		envDifficultyGroup.ifPresentOrElse(
 		        difficultyGroup -> this.difficultyGroup = Integer.parseInt(envDifficultyGroup.get()),
 		        () -> this.difficultyGroup = 0);
+		this.port = Integer.parseInt(System.getenv("PORT"));
 		
 		this.token = System.getenv("REPROVA_TOKEN");
 	}
@@ -40,6 +42,10 @@ public class Environments {
 	
 	public String getToken() {
 	    return this.token;
+	}
+	
+	public int getPort() {
+	    return this.port;
 	}
 
 }

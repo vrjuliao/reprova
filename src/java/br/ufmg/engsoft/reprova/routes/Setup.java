@@ -5,6 +5,7 @@ import spark.Spark;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import br.ufmg.engsoft.reprova.database.AnswersDAO;
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
 import br.ufmg.engsoft.reprova.routes.api.Answers;
 import br.ufmg.engsoft.reprova.routes.api.Questions;
@@ -30,7 +31,7 @@ public class Setup {
   /**
    * The port for the webserver.
    */
-  protected static final int port = Integer.parseInt(System.getenv("PORT"));
+  protected static final int port = Environments.getInstance().getPort();
 
 
   /**
@@ -50,7 +51,6 @@ public class Setup {
       throw new IllegalArgumentException("questionsDAO mustn't be null");
     }
 
-
     Spark.port(Setup.port);
 
     logger.info("Spark on port " + Setup.port);
@@ -61,12 +61,13 @@ public class Setup {
     logger.info("Setting up questions route:");
     var questions = new Questions(json, questionsDAO);
     questions.setup();
-    
-    boolean answersEnabled = Environments.getInstance().getEnableAnswers(); 
-    if (answersEnabled) {
-    	var answers = new Answers();
-    	answers.setup();
-    }
-    
+  }
+  
+  public static void answerRoutes(Json json, AnswersDAO answersDAO) {      
+      if (answersDAO == null) {
+        throw new IllegalArgumentException("answersDAO mustn't be null");
+      }
+      var answers = new Answers(json, answersDAO);
+      answers.setup();
   }
 }
