@@ -7,6 +7,8 @@ import spark.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
 import br.ufmg.engsoft.reprova.model.Question;
 import br.ufmg.engsoft.reprova.model.ReprovaRoute;
@@ -64,6 +66,7 @@ public class Questions extends ReprovaRoute {
     Spark.get("/api/questions", this::get);
     Spark.post("/api/questions", this::post);
     Spark.delete("/api/questions", this::delete);
+    Spark.delete("/api/questions/deleteAll", this::deleteAll);
 
     logger.info("Setup /api/questions.");
   }
@@ -175,8 +178,6 @@ public class Questions extends ReprovaRoute {
       return invalid;
     }
 
-    question.calculateDifficulty();
-
     logger.info("Parsed " + question.toString());
     logger.info("Adding question.");
 
@@ -222,6 +223,46 @@ public class Questions extends ReprovaRoute {
 
     var success = questionsDAO.remove(id);
 
+    logger.info("Done. Responding...");
+
+    response.status(
+      success ? 200
+              : 400
+    );
+
+    return ok;
+  }
+
+  /**
+   * Delete All endpoint: remove all questions from the database.
+   * This endpoint is for authorized access only.
+   */
+  protected Object deleteAll(Request request, Response response) {
+    logger.info("Received questions delete all:");
+
+    response.type("application/json");
+
+    var token = request.queryParams("token");
+
+    if (!authorized(token)) {
+      logger.info("Unauthorized token: " + token);
+      response.status(403);
+      return unauthorized;
+    }
+
+    boolean success = false;
+    logger.info("Deleting all questions");
+    ArrayList<Question> questions = new ArrayList<Question>(questionsDAO.list(null, null));
+    for (Question question : questions){
+      String id = question.id;
+      logger.info("Deleting question " + id);
+      
+      success = questionsDAO.remove(id);
+      if (!success){
+        break;
+      }
+    }
+      
     logger.info("Done. Responding...");
 
     response.status(

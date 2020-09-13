@@ -9,6 +9,8 @@ import br.ufmg.engsoft.reprova.database.AnswersDAO;
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
 import br.ufmg.engsoft.reprova.routes.api.Answers;
 import br.ufmg.engsoft.reprova.routes.api.Questions;
+import br.ufmg.engsoft.reprova.database.QuestionnairesDAO;
+import br.ufmg.engsoft.reprova.routes.api.Questionnaires;
 import br.ufmg.engsoft.reprova.mime.json.Json;
 import br.ufmg.engsoft.reprova.model.Environments;
 
@@ -60,14 +62,24 @@ public class Setup {
 
     logger.info("Setting up questions route:");
     var questions = new Questions(json, questionsDAO);
-    questions.setup();
+    questions.setup();    
   }
   
   public static void answerRoutes(Json json, AnswersDAO answersDAO) {      
+      logger.info("Setting up answers route:");
       if (answersDAO == null) {
         throw new IllegalArgumentException("answersDAO mustn't be null");
       }
       var answers = new Answers(json, answersDAO);
       answers.setup();
+  }
+  
+  public static void questionnaireRoutes(Json json, QuestionnairesDAO questionnairesDAO, QuestionsDAO questionsDAO) {
+      logger.info("Setting up questionnaires route:");
+      if (questionnairesDAO == null) {
+          throw new IllegalArgumentException("questionnairesDAO mustn't be null");
+        }
+      var questionnaires = new Questionnaires(json, questionnairesDAO, questionsDAO);
+      questionnaires.setup();
   }
 }

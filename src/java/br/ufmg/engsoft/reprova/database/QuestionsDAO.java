@@ -42,8 +42,6 @@ public class QuestionsDAO {
    */
   protected final MongoCollection<Document> collection;
 
-
-
   /**
    * Basic constructor.
    * @param db    the database, mustn't be null
@@ -164,22 +162,26 @@ public class QuestionsDAO {
     if (question == null) {
       throw new IllegalArgumentException("question mustn't be null");
     }
-
-    Map<String, Object> record = question.record // Convert the keys to string,
-      .entrySet()                                // and values to object.
-      .stream()
-      .collect(
-        Collectors.toMap(
-          e -> e.getKey().toString(),
-          Map.Entry::getValue
-        )
-      );
+    
+    question.calculateDifficulty();
+    Map<String, Object> record = null;
+    if (question.record != null){
+      record = question.record // Convert the keys to string,
+        .entrySet()                                // and values to object.
+        .stream()
+        .collect(
+          Collectors.toMap(
+            e -> e.getKey().toString(),
+            Map.Entry::getValue
+          )
+        );
+    }
 
     Document doc = new Document()
       .append("theme", question.theme)
       .append("description", question.description)
       .append("statement", question.statement)
-      .append("record", new Document(record))
+      .append("record", record == null ? null : new Document(record))
       .append("pvt", question.pvt)
       .append("difficulty", question.difficulty);
 
