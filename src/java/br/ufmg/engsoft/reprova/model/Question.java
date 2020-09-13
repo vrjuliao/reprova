@@ -1,6 +1,5 @@
 package br.ufmg.engsoft.reprova.model;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +55,6 @@ public class Question {
     protected String statement;
     protected Map<Semester, Map<String, Float>> record;
     protected boolean pvt = true;
-    protected List<Answer> answers;
     protected String difficulty;
     protected List<String> difficultyGroup;
 
@@ -99,12 +97,6 @@ public class Question {
       this.difficultyGroup = difficulty;
       return this;
     }
-    
-    public Builder answers(List<Answer> answers) {
-        this.answers = answers;
-        return this;
-    }
-
 
     /**
      * Build the question.
@@ -139,10 +131,6 @@ public class Question {
       }
       
       Environments environments = Environments.getInstance();
-       
-      if (environments.getEnableAnswers()) {
-    	  this.answers = new ArrayList<Answer>();
-      }
 
       if (environments.getDifficultyGroup() != 0) {
     	// TODO validate possible values (3 and 5)
@@ -161,7 +149,6 @@ public class Question {
         this.statement,
         this.record,
         this.pvt,
-        this.answers,
         this.difficulty,
         this.difficultyGroup
       );
@@ -178,7 +165,6 @@ public class Question {
     String statement,
     Map<Semester, Map<String, Float>> record,
     boolean pvt,
-    List<Answer> answers,
     String difficulty,
     List<String> difficultyGroup
   ) {

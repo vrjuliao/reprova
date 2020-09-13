@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import br.ufmg.engsoft.reprova.database.AnswersDAO;
 import br.ufmg.engsoft.reprova.mime.json.Json;
 import br.ufmg.engsoft.reprova.model.Answer;
-import br.ufmg.engsoft.reprova.model.Question;
 import br.ufmg.engsoft.reprova.model.ReprovaRoute;
 import spark.Request;
 import spark.Response;

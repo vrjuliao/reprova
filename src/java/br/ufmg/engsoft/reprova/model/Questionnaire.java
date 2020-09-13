@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
+import br.ufmg.engsoft.reprova.model.difficulty.DifficultyFactory;
 
 /**
  * The Questionnaire type
@@ -28,6 +29,9 @@ public class Questionnaire{
    * The Questionnaire's total estimated time.
    */
   public final int totalEstimatedTime;
+  
+  private static final int DEFAULT_ESTIMATED_TIME_MINUTES = 60;
+  private static final int DEFAULT_QUESTIONS_COUNT = 5;
 
   public static class Generator{
     protected String id;
@@ -36,6 +40,7 @@ public class Questionnaire{
     protected int questionsCount;
     private List<Question> allQuestions;
     private List<String> difficultyGroup;
+
 
     public Generator id(String id){
       this.id = id;
@@ -84,16 +89,11 @@ public class Questionnaire{
      * Calls the Questionnaire's Builder.
      */
     public Questionnaire generate(QuestionsDAO questionsDAO){
-      String envDifficultyGroup = System.getenv("DIFFICULTY_GROUP");
-      if (envDifficultyGroup != null){
-        if (envDifficultyGroup.equals("3")){
-          this.difficultyGroup = new DifficultyFactory(3).difficultyGroup.getDifficulties();
-        } else {
-          this.difficultyGroup = new DifficultyFactory(5).difficultyGroup.getDifficulties();
-        }
-      } else {
-        this.difficultyGroup = null;
-      }
+      Environments environments = Environments.getInstance();
+      int valueDifficultyGroup = environments.getDifficultyGroup();
+      this.difficultyGroup = new DifficultyFactory()
+                                  .getDifficulty(valueDifficultyGroup)
+                                  .getDifficulties();
 
       if (this.averageDifficulty == null){
         this.averageDifficulty = "Average";
@@ -103,10 +103,10 @@ public class Questionnaire{
         }
       }
       if (this.totalEstimatedTime == 0){
-        this.totalEstimatedTime = 60;
+        this.totalEstimatedTime = Questionnaire.DEFAULT_ESTIMATED_TIME_MINUTES;
       }
       if (this.questionsCount == 0){
-        this.questionsCount = 5;
+        this.questionsCount = Questionnaire.DEFAULT_QUESTIONS_COUNT;
       }
 
       ArrayList<Question> questions = new ArrayList<Question>();
