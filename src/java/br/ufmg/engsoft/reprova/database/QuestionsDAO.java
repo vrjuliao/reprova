@@ -85,7 +85,10 @@ public class QuestionsDAO {
         .build();
 
       logger.info("Parsed question: " + question);
-
+      logger.info("Media " + question.calculateGradeAverage());
+      logger.info("DP " + question.calculateGradeStandardDeviation());
+      logger.info("Mediana " + question.calculateGradeMedian());
+      
       return question;
     }
     catch (Exception e) {
@@ -113,7 +116,7 @@ public class QuestionsDAO {
     if (question == null) {
       logger.info("No such question " + id);
     }
-
+    
     return question;
   }
 

@@ -1,5 +1,7 @@
 package br.ufmg.engsoft.reprova.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +46,10 @@ public class Question {
    * The difficulty's possible values.
    */
   private final List<String> difficultyGroup;
+  /**
+   * The grade for each student that took the question.
+   */
+  private final Map<String,Double> studentsGrade;
 
   /**
    * Builder for Question.
@@ -57,6 +63,8 @@ public class Question {
     protected boolean pvt = true;
     protected String difficulty;
     protected List<String> difficultyGroup;
+    protected Map<String,Double> studentsGrade;
+    
 
     public Builder id(String id) {
       this.id = id;
@@ -97,6 +105,11 @@ public class Question {
       this.difficultyGroup = difficulty;
       return this;
     }
+    
+    public Builder studentsGrade(Map<String,Double> studentsGrade) {
+    	this.studentsGrade = studentsGrade;
+    	return this;
+    }
 
     /**
      * Build the question.
@@ -130,6 +143,20 @@ public class Question {
         }    
       }
       
+      if(this.studentsGrade == null) {
+    	  this.studentsGrade = new HashMap<String,Double>();
+    	  this.studentsGrade.put("2016006913", 21.0);
+    	  this.studentsGrade.put("2016006915", 25.0);
+    	  this.studentsGrade.put("2016006914", 24.0);
+    	  this.studentsGrade.put("2016006916", 4.0);
+      } else {
+    	  for(var entry: this.studentsGrade.entrySet()) {
+    		  if(entry.getValue() == null) {
+    			  throw new IllegalArgumentException("inner student grade mustn't be null");
+    		  }
+    	  }
+      }
+      
       Environments environments = Environments.getInstance();
 
       if (environments.getDifficultyGroup() != 0) {
@@ -150,7 +177,8 @@ public class Question {
         this.record,
         this.pvt,
         this.difficulty,
-        this.difficultyGroup
+        this.difficultyGroup,
+        this.studentsGrade
       );
     }
   }
@@ -166,7 +194,8 @@ public class Question {
     Map<Semester, Map<String, Float>> record,
     boolean pvt,
     String difficulty,
-    List<String> difficultyGroup
+    List<String> difficultyGroup,
+    Map<String,Double> studentsGrade
   ) {
     this.id = id;
     this.theme = theme;
@@ -176,9 +205,47 @@ public class Question {
     this.pvt = pvt;
     this.difficulty = difficulty;
     this.difficultyGroup = difficultyGroup;
+    this.studentsGrade = studentsGrade;
   }
 
 
+  /* Calculate Grades Average */
+  public double calculateGradeAverage() {
+	  double sum = 0.0;
+	  for(var value: this.studentsGrade.values()) {
+		  sum += value;
+	  }
+	  return sum/this.studentsGrade.size();
+  }
+  
+  public double calculateGradeStandardDeviation() {
+	  double average = this.calculateGradeAverage();
+	  double sum = 0.0;
+	  for(var value: this.studentsGrade.values()) {
+		  sum += Math.pow(value - average, 2.0);
+	  }
+	  double stdDev = Math.sqrt(sum/(this.studentsGrade.size() - 1));
+	  return stdDev;
+  }
+  
+  public double calculateGradeMedian() {
+	  List<Double> gradeList = new ArrayList<Double>();
+	  for(var value: this.studentsGrade.values()) {
+		  gradeList.add(value);
+	  }
+	  Collections.sort(gradeList);
+	  
+	  int i = gradeList.size()/2;
+	  if(gradeList.size() % 2 == 0) {
+		  return (gradeList.get(i-1) + gradeList.get(i))/2;
+	  } else {
+		  return gradeList.get(i);
+	  }
+	 	  
+  }
+  
+
+  
   /**
    * Calculate the difficulty based on the record and the difficultyGroup.
    * Should be called when changes are made to the record.
@@ -223,7 +290,8 @@ public class Question {
         && this.statement.equals(question.statement)
         && this.record.equals(question.record)
         && this.pvt == question.pvt
-        && this.difficulty.equals(question.difficulty);
+        && this.difficulty.equals(question.difficulty)
+        && this.studentsGrade.equals(question.studentsGrade);
   }
 
 
@@ -236,7 +304,8 @@ public class Question {
       this.statement,
       this.record,
       this.pvt,
-      this.difficulty
+      this.difficulty,
+      this.studentsGrade
     );
   }
 
@@ -256,6 +325,7 @@ public class Question {
     builder.append("  pvt: " + this.pvt + "\n");
     builder.append("  difficulty: " + this.difficulty + "\n");
     builder.append("  difficultyGroup: " + this.difficultyGroup + "\n");
+    builder.append("  studentsGrade: " + this.studentsGrade + "\n");
     
     if (this.statement != null) {
       builder.append(
