@@ -1,5 +1,7 @@
 package br.ufmg.engsoft.reprova.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +33,7 @@ public class Question {
   /**
    * The record of the question per semester per class. Mustn't be null, may be empty.
    */
-  public final Map<Semester, Map<String, Float>> record;
+  public final Map<Semester, Map<String, Map<String, Float>>> record;
   /**
    * Whether the question is private.
    */
@@ -44,6 +46,9 @@ public class Question {
    * The difficulty's possible values.
    */
   private final List<String> difficultyGroup;
+  /**
+   * The grade for each student that took the question.
+   */
 
   /**
    * Builder for Question.
@@ -53,10 +58,11 @@ public class Question {
     protected String theme;
     protected String description;
     protected String statement;
-    protected Map<Semester, Map<String, Float>> record;
+    protected Map<Semester, Map<String, Map<String, Float>>> record;
     protected boolean pvt = true;
     protected String difficulty;
     protected List<String> difficultyGroup;
+    
 
     public Builder id(String id) {
       this.id = id;
@@ -78,7 +84,7 @@ public class Question {
       return this;
     }
 
-    public Builder record(Map<Semester, Map<String, Float>> record) {
+    public Builder record(Map<Semester, Map<String, Map<String, Float>>> record) {
       this.record = record;
       return this;
     }
@@ -97,6 +103,8 @@ public class Question {
       this.difficultyGroup = difficulty;
       return this;
     }
+    
+
 
     /**
      * Build the question.
@@ -120,7 +128,7 @@ public class Question {
       }
 
       if (this.record == null) {
-        this.record = new HashMap<Semester, Map<String, Float>>();
+        this.record = new HashMap<Semester, Map<String, Map<String, Float>>>();
       } else {
         // All inner maps mustn't be null:
         for (var entry : this.record.entrySet()) {
@@ -129,6 +137,8 @@ public class Question {
         	}
         }    
       }
+      
+     
       
       Environments environments = Environments.getInstance();
 
@@ -163,7 +173,7 @@ public class Question {
     String theme,
     String description,
     String statement,
-    Map<Semester, Map<String, Float>> record,
+    Map<Semester, Map<String, Map<String, Float>>> record,
     boolean pvt,
     String difficulty,
     List<String> difficultyGroup
@@ -179,6 +189,67 @@ public class Question {
   }
 
 
+  /* Calculate Grades Average */
+  public double calculateGradeAverage() {
+	  double acc = 0;
+	    for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
+	      double acc2 = 0;
+	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()){
+	        acc2 += innerEntry.getValue().values().stream().mapToDouble(Float::doubleValue).average().orElse(0);
+	      }
+	      acc += acc2/entry.getValue().entrySet().size();
+	    }
+
+	    return acc/this.record.size();
+  }
+  
+  /* Calculate Grades Standart Deviation */
+  public double calculateGradeStandardDeviation() {
+	  double average = this.calculateGradeAverage();
+	  double sum = 0.0;
+	  int qtdNotas = 0;
+	  
+	  for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
+	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()){
+	        for(var notas: innerEntry.getValue().values()) {
+	        	sum += Math.pow(notas - average, 2);
+	        	qtdNotas++;
+	        }
+	      }
+	    }
+	  
+	  double stdDev = Math.sqrt(sum/(qtdNotas - 1));
+
+	  return stdDev;
+  }
+  
+  /* Calculate Grades Median */
+  public double calculateGradeMedian() {
+	  List<Float> gradeList = new ArrayList<Float>();
+	  
+	  for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
+	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()){
+	        for(var notas: innerEntry.getValue().values()) {
+	        	gradeList.add(notas);
+	        }
+	      }
+	    }
+	  
+	  Collections.sort(gradeList);
+	  if(gradeList.size() == 0) {
+		  return 0.0;
+	  }
+	  int i = gradeList.size()/2;
+	  if(gradeList.size() % 2 == 0) {
+		  return (gradeList.get(i-1) + gradeList.get(i))/2;
+	  } else {
+		  return gradeList.get(i);
+	  }
+	 	  
+  }
+  
+
+  
   /**
    * Calculate the difficulty based on the record and the difficultyGroup.
    * Should be called when changes are made to the record.
@@ -188,12 +259,8 @@ public class Question {
       return;
     }
 
-    double acc = 0;
-    for (Map.Entry<Semester, Map<String, Float>> entry : this.record.entrySet()) {
-      acc += entry.getValue().values().stream().mapToDouble(Float::doubleValue).average().orElse(0);
-    };
-
-    double avg = acc/this.record.size();
+    double avg = calculateGradeAverage();
+    
     int difficultyIndex = new DifficultyFactory()
                                 .getDifficulty(this.difficultyGroup.size())
                                 .getDifficultyGroup(avg);

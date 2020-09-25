@@ -83,9 +83,7 @@ public class QuestionsDAO {
       var question = json
         .parse(doc, Question.Builder.class)
         .build();
-
-      logger.info("Parsed question: " + question);
-
+      
       return question;
     }
     catch (Exception e) {
@@ -105,6 +103,9 @@ public class QuestionsDAO {
     if (id == null)
       throw new IllegalArgumentException("id mustn't be null");
 
+    
+    
+    
     var question = this.collection
       .find(eq(new ObjectId(id)))
       .map(this::parseDoc)
@@ -113,7 +114,7 @@ public class QuestionsDAO {
     if (question == null) {
       logger.info("No such question " + id);
     }
-
+    
     return question;
   }
 
@@ -184,6 +185,7 @@ public class QuestionsDAO {
       .append("record", record == null ? null : new Document(record))
       .append("pvt", question.pvt)
       .append("difficulty", question.difficulty);
+     
 
     var id = question.id;
     if (id != null) {
@@ -220,6 +222,9 @@ public class QuestionsDAO {
     var result = this.collection.deleteOne(
       eq(new ObjectId(id))
     ).wasAcknowledged();
+    
+    
+    
 
     if (result) {
       logger.info("Deleted question " + id);
