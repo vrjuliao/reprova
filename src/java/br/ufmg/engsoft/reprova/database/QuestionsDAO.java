@@ -182,10 +182,10 @@ public class QuestionsDAO {
       .append("theme", question.theme)
       .append("description", question.description)
       .append("statement", question.statement)
+      .append("estimatedTime", question.estimatedTime)
       .append("record", record == null ? null : new Document(record))
       .append("pvt", question.pvt)
       .append("difficulty", question.difficulty);
-     
 
     var id = question.id;
     if (id != null) {

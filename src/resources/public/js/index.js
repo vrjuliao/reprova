@@ -111,6 +111,7 @@ function questionsTable(data) {
           q.theme,
           { elem: record },
           q.pvt,
+          q.estimatedTime,
           q.difficulty,
           { elem: actions }
         ];
@@ -119,6 +120,7 @@ function questionsTable(data) {
         return [
           { elem: description },
           q.theme,
+          q.estimatedTime,
           q.difficulty,
           { elem: actions }
         ];
