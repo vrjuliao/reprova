@@ -156,6 +156,7 @@ async function load() {
   $('#theme').val(question.theme);
   loadRecord(question.record);
   $('#pvt').prop('checked', question.pvt);
+  $('#estimatedTime').val(question.estimatedTime);
 
   return question;
 }
@@ -165,6 +166,7 @@ async function save() {
   const description = $('#description');
   const theme = $('#theme');
   const pvt = $('#pvt').prop('checked');
+  const estimatedTime = $('#estimatedTime');
 
   if (textboxEmpty(description)) {
     alert('Please fill in the description!');
@@ -194,6 +196,7 @@ async function save() {
     'statement': statement,
     'record': question.record,
     'pvt': pvt,
+    'estimatedTime': estimatedTime.val(),
   };
 
   if (id)

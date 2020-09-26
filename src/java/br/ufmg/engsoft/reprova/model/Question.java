@@ -39,6 +39,11 @@ public class Question {
    */
   public final boolean pvt;
   /**
+   * The estimated time in minutes for the question to be solved
+   */
+  public final int estimatedTime;
+
+  /*
    * The difficulty of the question. May have different groupings.
    */
   public String difficulty;
@@ -60,6 +65,7 @@ public class Question {
     protected String statement;
     protected Map<Semester, Map<String, Map<String, Float>>> record;
     protected boolean pvt = true;
+    protected int estimatedTime;
     protected String difficulty;
     protected List<String> difficultyGroup;
     
@@ -94,6 +100,10 @@ public class Question {
       return this;
     }
 
+    public Builder estimatedTime(int estimatedTime){
+      this.estimatedTime = estimatedTime;
+      return this;
+    }
     public Builder difficulty(String difficulty){
       this.difficulty = difficulty;
       return this;
@@ -159,6 +169,7 @@ public class Question {
         this.statement,
         this.record,
         this.pvt,
+        this.estimatedTime,
         this.difficulty,
         this.difficultyGroup
       );
@@ -173,8 +184,9 @@ public class Question {
     String theme,
     String description,
     String statement,
-    Map<Semester, Map<String, Map<String, Float>>> record,
     boolean pvt,
+    int estimatedTime,
+    Map<Semester, Map<String, Map<String, Float>>> record,
     String difficulty,
     List<String> difficultyGroup
   ) {
@@ -184,6 +196,7 @@ public class Question {
     this.statement = statement;
     this.record = record;
     this.pvt = pvt;
+    this.estimatedTime = estimatedTime;
     this.difficulty = difficulty;
     this.difficultyGroup = difficultyGroup;
   }
@@ -290,6 +303,7 @@ public class Question {
         && this.statement.equals(question.statement)
         && this.record.equals(question.record)
         && this.pvt == question.pvt
+        && this.estimatedTime == question.estimatedTime
         && this.difficulty.equals(question.difficulty);
   }
 
@@ -303,6 +317,7 @@ public class Question {
       this.statement,
       this.record,
       this.pvt,
+      this.estimatedTime,
       this.difficulty
     );
   }
@@ -321,6 +336,7 @@ public class Question {
     builder.append("  desc: " + this.description + "\n");
     builder.append("  record: " + this.record + "\n");
     builder.append("  pvt: " + this.pvt + "\n");
+    builder.append("  estimatedTime: " + this.estimatedTime + "\n");
     builder.append("  difficulty: " + this.difficulty + "\n");
     builder.append("  difficultyGroup: " + this.difficultyGroup + "\n");
     

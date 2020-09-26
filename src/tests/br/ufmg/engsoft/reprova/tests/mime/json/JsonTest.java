@@ -33,6 +33,7 @@ public class JsonTest {
       //   )
       // )
       .pvt(false)
+      .estimatedTime(8)
       .build();
 
     var formatter = new Json();
