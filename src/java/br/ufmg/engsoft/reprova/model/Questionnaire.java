@@ -26,7 +26,7 @@ public class Questionnaire{
   /**
    * The Questionnaire's total estimated time.
    */
-  public final int totalEstimatedTime;
+  public int totalEstimatedTime;
   
   public static final int DEFAULT_ESTIMATED_TIME_MINUTES = 60;
   public static final int DEFAULT_QUESTIONS_COUNT = 5;

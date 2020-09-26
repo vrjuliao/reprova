@@ -162,6 +162,7 @@ public class QuestionnairesDAO {
           .append("statement", question.statement)
           .append("record", record == null ? null : new Document(record))
           .append("pvt", question.pvt)
+          .append("estimatedTime", question.estimatedTime)
           .append("difficulty", question.difficulty);
       
       questions.add(doc);
