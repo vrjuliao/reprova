@@ -184,9 +184,9 @@ public class Question {
     String theme,
     String description,
     String statement,
+    Map<Semester, Map<String, Map<String, Float>>> record,
     boolean pvt,
     int estimatedTime,
-    Map<Semester, Map<String, Map<String, Float>>> record,
     String difficulty,
     List<String> difficultyGroup
   ) {
