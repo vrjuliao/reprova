@@ -1,8 +1,12 @@
 package br.ufmg.engsoft.reprova.model;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import br.ufmg.engsoft.reprova.model.difficulty.DifficultyFactory;
 
 
 /**
@@ -29,7 +33,7 @@ public class Question {
   /**
    * The record of the question per semester per class. Mustn't be null, may be empty.
    */
-  public final Map<Semester, Map<String, Float>> record;
+  public final Map<Semester, Map<String, Map<String, Float>>> record;
   /**
    * Whether the question is private.
    */
@@ -39,6 +43,17 @@ public class Question {
    */
   public final int estimatedTime;
 
+  /*
+   * The difficulty of the question. May have different groupings.
+   */
+  public String difficulty;
+  /**
+   * The difficulty's possible values.
+   */
+  private final List<String> difficultyGroup;
+  /**
+   * The grade for each student that took the question.
+   */
 
   /**
    * Builder for Question.
@@ -48,9 +63,12 @@ public class Question {
     protected String theme;
     protected String description;
     protected String statement;
-    protected Map<Semester, Map<String, Float>> record;
+    protected Map<Semester, Map<String, Map<String, Float>>> record;
     protected boolean pvt = true;
     protected int estimatedTime;
+    protected String difficulty;
+    protected List<String> difficultyGroup;
+    
 
     public Builder id(String id) {
       this.id = id;
@@ -72,7 +90,7 @@ public class Question {
       return this;
     }
 
-    public Builder record(Map<Semester, Map<String, Float>> record) {
+    public Builder record(Map<Semester, Map<String, Map<String, Float>>> record) {
       this.record = record;
       return this;
     }
@@ -86,6 +104,16 @@ public class Question {
       this.estimatedTime = estimatedTime;
       return this;
     }
+    public Builder difficulty(String difficulty){
+      this.difficulty = difficulty;
+      return this;
+    }
+    
+    public Builder difficultyGroup(List<String> difficulty){
+      this.difficultyGroup = difficulty;
+      return this;
+    }
+    
 
 
     /**
@@ -110,15 +138,28 @@ public class Question {
       }
 
       if (this.record == null) {
-        this.record = new HashMap<Semester, Map<String, Float>>();
-      }
-      else {
+        this.record = new HashMap<Semester, Map<String, Map<String, Float>>>();
+      } else {
         // All inner maps mustn't be null:
         for (var entry : this.record.entrySet()) {
         	if (entry.getValue() == null) {
                 throw new IllegalArgumentException("inner record mustn't be null");
         	}
         }    
+      }
+      
+     
+      
+      Environments environments = Environments.getInstance();
+
+      if (environments.getDifficultyGroup() != 0) {
+    	// TODO validate possible values (3 and 5)
+    	int valueDifficultyGroup = environments.getDifficultyGroup();
+    	this.difficultyGroup = new DifficultyFactory()
+    								.getDifficulty(valueDifficultyGroup)
+    								.getDifficulties();
+      } else {
+        this.difficultyGroup = null;
       }
 
       return new Question(
@@ -128,7 +169,9 @@ public class Question {
         this.statement,
         this.record,
         this.pvt,
-        this.estimatedTime
+        this.estimatedTime,
+        this.difficulty,
+        this.difficultyGroup
       );
     }
   }
@@ -141,9 +184,11 @@ public class Question {
     String theme,
     String description,
     String statement,
-    Map<Semester, Map<String, Float>> record,
     boolean pvt,
-    int estimatedTime
+    int estimatedTime,
+    Map<Semester, Map<String, Map<String, Float>>> record,
+    String difficulty,
+    List<String> difficultyGroup
   ) {
     this.id = id;
     this.theme = theme;
@@ -152,8 +197,88 @@ public class Question {
     this.record = record;
     this.pvt = pvt;
     this.estimatedTime = estimatedTime;
+    this.difficulty = difficulty;
+    this.difficultyGroup = difficultyGroup;
   }
 
+
+  /* Calculate Grades Average */
+  public double calculateGradeAverage() {
+	  double acc = 0;
+	    for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
+	      double acc2 = 0;
+	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()){
+	        acc2 += innerEntry.getValue().values().stream().mapToDouble(Float::doubleValue).average().orElse(0);
+	      }
+	      acc += acc2/entry.getValue().entrySet().size();
+	    }
+
+	    return acc/this.record.size();
+  }
+  
+  /* Calculate Grades Standart Deviation */
+  public double calculateGradeStandardDeviation() {
+	  double average = this.calculateGradeAverage();
+	  double sum = 0.0;
+	  int qtdNotas = 0;
+	  
+	  for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
+	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()){
+	        for(var notas: innerEntry.getValue().values()) {
+	        	sum += Math.pow(notas - average, 2);
+	        	qtdNotas++;
+	        }
+	      }
+	    }
+	  
+	  double stdDev = Math.sqrt(sum/(qtdNotas - 1));
+
+	  return stdDev;
+  }
+  
+  /* Calculate Grades Median */
+  public double calculateGradeMedian() {
+	  List<Float> gradeList = new ArrayList<Float>();
+	  
+	  for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
+	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()){
+	        for(var notas: innerEntry.getValue().values()) {
+	        	gradeList.add(notas);
+	        }
+	      }
+	    }
+	  
+	  Collections.sort(gradeList);
+	  if(gradeList.size() == 0) {
+		  return 0.0;
+	  }
+	  int i = gradeList.size()/2;
+	  if(gradeList.size() % 2 == 0) {
+		  return (gradeList.get(i-1) + gradeList.get(i))/2;
+	  } else {
+		  return gradeList.get(i);
+	  }
+	 	  
+  }
+  
+
+  
+  /**
+   * Calculate the difficulty based on the record and the difficultyGroup.
+   * Should be called when changes are made to the record.
+   */
+  public void calculateDifficulty(){
+    if (this.difficultyGroup == null){
+      return;
+    }
+
+    double avg = calculateGradeAverage();
+    
+    int difficultyIndex = new DifficultyFactory()
+                                .getDifficulty(this.difficultyGroup.size())
+                                .getDifficultyGroup(avg);
+    this.difficulty = this.difficultyGroup.get(difficultyIndex);
+  }
 
 
   /**
@@ -178,7 +303,8 @@ public class Question {
         && this.statement.equals(question.statement)
         && this.record.equals(question.record)
         && this.pvt == question.pvt
-        && this.estimatedTime == question.estimatedTime;
+        && this.estimatedTime == question.estimatedTime
+        && this.difficulty.equals(question.difficulty);
   }
 
 
@@ -191,7 +317,8 @@ public class Question {
       this.statement,
       this.record,
       this.pvt,
-      this.estimatedTime
+      this.estimatedTime,
+      this.difficulty
     );
   }
 
@@ -210,6 +337,9 @@ public class Question {
     builder.append("  record: " + this.record + "\n");
     builder.append("  pvt: " + this.pvt + "\n");
     builder.append("  estimatedTime: " + this.estimatedTime + "\n");
+    builder.append("  difficulty: " + this.difficulty + "\n");
+    builder.append("  difficultyGroup: " + this.difficultyGroup + "\n");
+    
     if (this.statement != null) {
       builder.append(
         "  head: " +
@@ -220,6 +350,7 @@ public class Question {
         "\n"
       );
     }
+    
 
     return builder.toString();
   }

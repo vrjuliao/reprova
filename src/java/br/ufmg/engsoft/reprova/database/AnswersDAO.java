@@ -3,7 +3,6 @@ package br.ufmg.engsoft.reprova.database;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -20,17 +19,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.ufmg.engsoft.reprova.mime.json.Json;
-import br.ufmg.engsoft.reprova.model.Question;
+import br.ufmg.engsoft.reprova.model.Answer;
 
 
 /**
  * DAO for Question class on mongodb.
  */
-public class QuestionsDAO {
+public class AnswersDAO {
   /**
    * Logger instance.
    */
-  protected static final Logger logger = LoggerFactory.getLogger(QuestionsDAO.class);
+  protected static final Logger logger = LoggerFactory.getLogger(AnswersDAO.class);
 
   /**
    * Json formatter.
@@ -48,7 +47,7 @@ public class QuestionsDAO {
    * @param json  the json formatter for the database's documents, mustn't be null
    * @throws IllegalArgumentException  if any parameter is null
    */
-  public QuestionsDAO(Mongo db, Json json) {
+  public AnswersDAO(Mongo db, Json json) {
     if (db == null) {
       throw new IllegalArgumentException("db mustn't be null");
     }
@@ -57,7 +56,7 @@ public class QuestionsDAO {
       throw new IllegalArgumentException("json mustn't be null");
     }
 
-    this.collection = db.getCollection("questions");
+    this.collection = db.getCollection("answers");
 
     this.json = json;
   }
@@ -66,25 +65,27 @@ public class QuestionsDAO {
 
   /**
    * Parse the given document.
-   * @param document  the question document, mustn't be null
+   * @param document  the answer document, mustn't be null
    * @throws IllegalArgumentException  if any parameter is null
    * @throws IllegalArgumentException  if the given document is an invalid Question
    */
-  protected Question parseDoc(Document document) {
+  protected Answer parseDoc(Document document) {
     if (document == null) {
       throw new IllegalArgumentException("document mustn't be null");
     }
 
     var doc = document.toJson();
 
-    logger.info("Fetched question: " + doc);
+    logger.info("Fetched answer: " + doc);
 
     try {
-      var question = json
-        .parse(doc, Question.Builder.class)
+      var answer = json
+        .parse(doc, Answer.Builder.class)
         .build();
-      
-      return question;
+
+      logger.info("Parsed answer: " + answer);
+
+      return answer;
     }
     catch (Exception e) {
       logger.error("Invalid document in database!", e);
@@ -94,44 +95,42 @@ public class QuestionsDAO {
 
 
   /**
-   * Get the question with the given id.
-   * @param id  the question's id in the database.
-   * @return The question, or null if no such question.
+   * Get the answer with the given id.
+   * @param id  the answer's id in the database.
+   * @return The answer, or null if no such question.
    * @throws IllegalArgumentException  if any parameter is null
    */
-  public Question get(String id) {
-    if (id == null)
+  public Answer get(String id) {
+    if (id == null) {
       throw new IllegalArgumentException("id mustn't be null");
+    }
 
-    
-    
-    
-    var question = this.collection
+    var answer = this.collection
       .find(eq(new ObjectId(id)))
       .map(this::parseDoc)
       .first();
 
-    if (question == null) {
-      logger.info("No such question " + id);
+    if (answer == null) {
+      logger.info("No such answer " + id);
     }
-    
-    return question;
+
+    return answer;
   }
 
 
   /**
-   * List all the questions that match the given non-null parameters.
+   * List all the answers that match the given non-null parameters.
    * The question's statement is ommited.
    * @param theme      the expected theme, or null
    * @param pvt        the expected privacy, or null
-   * @return The questions in the collection that match the given parameters, possibly
+   * @return The answers in the collection that match the given parameters, possibly
    *         empty.
    * @throws IllegalArgumentException  if there is an invalid Question
    */
-  public Collection<Question> list(String theme, Boolean pvt) {
+  public Collection<Answer> list(String questionId, Boolean pvt) {
     var filters =
       Arrays.asList(
-        theme == null ? null : eq("theme", theme),
+        questionId == null ? null : eq("questionId", questionId),
         pvt == null ? null : eq("pvt", pvt)
       )
       .stream()
@@ -142,7 +141,7 @@ public class QuestionsDAO {
       ? this.collection.find()
       : this.collection.find(and(filters));
 
-    var result = new ArrayList<Question>();
+    var result = new ArrayList<Answer>();
 
     doc.projection(fields(exclude("statement")))
       .map(this::parseDoc)
@@ -153,41 +152,28 @@ public class QuestionsDAO {
 
 
   /**
-   * Adds or updates the given question in the database.
-   * If the given question has an id, update, otherwise add.
-   * @param question  the question to be stored
-   * @return Whether the question was successfully added.
+   * Adds or updates the given answer in the database.
+   * If the given answer has an id, update, otherwise add.
+   * @param answer  the answer to be stored
+   * @param question the question for which the answer must be stored
+   * @return Whether the answer was successfully added.
    * @throws IllegalArgumentException  if any parameter is null
    */
-  public boolean add(Question question) {
-    if (question == null) {
-      throw new IllegalArgumentException("question mustn't be null");
+  public boolean add(Answer answer, String questionId) {
+    if (answer == null) {
+      throw new IllegalArgumentException("answer mustn't be null");
     }
     
-    question.calculateDifficulty();
-    Map<String, Object> record = null;
-    if (question.record != null){
-      record = question.record // Convert the keys to string,
-        .entrySet()                                // and values to object.
-        .stream()
-        .collect(
-          Collectors.toMap(
-            e -> e.getKey().toString(),
-            Map.Entry::getValue
-          )
-        );
+    if (questionId == null) {
+        throw new IllegalArgumentException("questionId must be passed");
     }
 
     Document doc = new Document()
-      .append("theme", question.theme)
-      .append("description", question.description)
-      .append("statement", question.statement)
-      .append("estimatedTime", question.estimatedTime)
-      .append("record", record == null ? null : new Document(record))
-      .append("pvt", question.pvt)
-      .append("difficulty", question.difficulty);
+      .append("description", answer.getDescription())
+      .append("pvt", answer.getPvt())
+      .append("questionId", questionId);
 
-    var id = question.id;
+    String id = answer.getId();
     if (id != null) {
       var result = this.collection.replaceOne(
         eq(new ObjectId(id)),
@@ -195,7 +181,7 @@ public class QuestionsDAO {
       );
 
       if (!result.wasAcknowledged()) {
-        logger.warn("Failed to replace question " + id);
+        logger.warn("Failed to replace answer " + id);
         return false;
       }
     }
@@ -203,33 +189,31 @@ public class QuestionsDAO {
       this.collection.insertOne(doc);
     }
 
-    logger.info("Stored question " + doc.get("_id"));
+    logger.info("Stored answer " + doc.get("_id"));
 
     return true;
   }
 
 
   /**
-   * Remove the question with the given id from the collection.
-   * @param id  the question id
+   * Remove the answer with the given id from the collection.
+   * @param id  the answer id
    * @return Whether the given question was removed.
    * @throws IllegalArgumentException  if any parameter is null
    */
   public boolean remove(String id) {
-    if (id == null)
+    if (id == null) {
       throw new IllegalArgumentException("id mustn't be null");
+    }
 
     var result = this.collection.deleteOne(
       eq(new ObjectId(id))
     ).wasAcknowledged();
-    
-    
-    
 
     if (result) {
-      logger.info("Deleted question " + id);
+      logger.info("Deleted answer " + id);
     } else {
-      logger.warn("Failed to delete question " + id);
+      logger.warn("Failed to delete answer " + id);
     }
 
     return result;
