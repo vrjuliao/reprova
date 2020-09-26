@@ -11,23 +11,33 @@ public class Environments {
 	private int difficultyGroup;
 	
 	private boolean enableAnswers;
-    private boolean enableQuestionnaires;
+	private boolean enableQuestionnaires;
+	private boolean enableEstimatedTime;
 	
 	private Environments() {		
 		Optional<String> enableAnswersEnv = Optional.ofNullable(System.getenv("ENABLE_ANSWERS"));
 		enableAnswersEnv.ifPresentOrElse(
-				enableAnswers -> this.enableAnswers = enableAnswers.toLowerCase().equals("true"),
-				() -> this.enableAnswers = false);
+			enableAnswers -> this.enableAnswers = enableAnswers.toLowerCase().equals("true"),
+			() -> this.enableAnswers = false
+		);
 		
 		Optional<String> enableQuestionnairesEnv = Optional.ofNullable(System.getenv("ENABLE_QUESTIONNAIRES"));
-        enableQuestionnairesEnv.ifPresentOrElse(
-                enableQuestionnaires -> this.enableQuestionnaires = enableQuestionnaires.toLowerCase().equals("true"),
-                () -> this.enableQuestionnaires = false);
+		enableQuestionnairesEnv.ifPresentOrElse(
+			enableQuestionnaires -> this.enableQuestionnaires = enableQuestionnaires.toLowerCase().equals("true"),
+			() -> this.enableQuestionnaires = false
+		);
+								
+		Optional<String> enableEstimatedTimeEnv = Optional.ofNullable(System.getenv("ENABLE_ESTIMATED_TIME"));
+		enableEstimatedTimeEnv.ifPresentOrElse(
+			enableEstimatedTime -> this.enableEstimatedTime = enableEstimatedTime.toLowerCase().equals("true"),
+			() -> this.enableEstimatedTime = false
+		);
 		
 		Optional<String> envDifficultyGroup = Optional.ofNullable(System.getenv("DIFFICULTY_GROUP"));
 		envDifficultyGroup.ifPresentOrElse(
-		        difficultyGroup -> this.difficultyGroup = Integer.parseInt(envDifficultyGroup.get()),
-		        () -> this.difficultyGroup = 0);
+			difficultyGroup -> this.difficultyGroup = Integer.parseInt(envDifficultyGroup.get()),
+			() -> this.difficultyGroup = 0
+		);
 		
 		this.port = Integer.parseInt(System.getenv("PORT"));
 		
@@ -47,19 +57,23 @@ public class Environments {
 	}
 	
 	public boolean getEnableQuestionnaires() {
-	    return this.enableQuestionnaires;
+		return this.enableQuestionnaires;
+	}
+
+	public boolean getEnableEstimatedTime() {
+		return this.enableEstimatedTime;
 	}
 	
 	public int getDifficultyGroup() {
-	    return this.difficultyGroup;
+		return this.difficultyGroup;
 	}
 	
 	public String getToken() {
-	    return this.token;
+		return this.token;
 	}
 	
 	public int getPort() {
-	    return this.port;
+		return this.port;
 	}
 
 }

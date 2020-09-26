@@ -22,16 +22,16 @@ public class JsonTest {
       .theme("theme")
       .description("description")
       .statement("statement")
-      .record(
-        Map.of(
-          new Semester(2019, Semester.Reference._1), Map.of(
-            "tw", 50.0f,
-            "tz", 49.5f,
-            "tx", 51.2f
-          ),
-          new Semester(2020, Semester.Reference._2), Collections.emptyMap()
-        )
-      )
+      // .record(
+      //   Map.of(
+      //     new Semester(2019, Semester.Reference._1), Map.of(
+      //       "tw", 50.0f,
+      //       "tz", 49.5f,
+      //       "tx", 51.2f
+      //     ),
+      //     new Semester(2020, Semester.Reference._2), Collections.emptyMap()
+      //   )
+      // )
       .pvt(false)
       .build();
 
