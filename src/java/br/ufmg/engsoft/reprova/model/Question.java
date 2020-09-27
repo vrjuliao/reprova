@@ -48,8 +48,9 @@ public class Question {
      */
     private final List<String> difficultyGroup;
     /**
-     * The grade for each student that took the question.
+     * The estimated time in minutes for the question to be solved
      */
+    public final int estimatedTime;
 
     /**
      * The list of choices for multiple choice.
@@ -66,6 +67,7 @@ public class Question {
         protected String statement;
         protected Map<Semester, Map<String, Map<String, Float>>> record;
         protected boolean pvt = true;
+        protected int estimatedTime;
         protected String difficulty;
         protected List<String> difficultyGroup;
         protected List<Map<String, Boolean>> choices;
@@ -100,6 +102,16 @@ public class Question {
             return this;
         }
 
+        public Builder choices(List<Map<String, Boolean>> choices) {
+            this.choices = choices;
+            return this;
+        }
+
+        public Builder estimatedTime(int estimatedTime) {
+            this.estimatedTime = estimatedTime;
+            return this;
+        }
+
         public Builder difficulty(String difficulty) {
             this.difficulty = difficulty;
             return this;
@@ -107,11 +119,6 @@ public class Question {
 
         public Builder difficultyGroup(List<String> difficulty) {
             this.difficultyGroup = difficulty;
-            return this;
-        }
-
-        public Builder choices(List<Map<String, Boolean>> choices) {
-            this.choices = choices;
             return this;
         }
 
@@ -151,7 +158,7 @@ public class Question {
             this.makeOptionals();
 
             return new Question(this.id, this.theme, this.description, this.statement, this.record, this.pvt,
-                    this.difficulty, this.difficultyGroup, this.choices);
+                    this.estimatedTime, this.difficulty, this.difficultyGroup, this.choices);
         }
 
         private void makeOptionals() {
@@ -171,7 +178,7 @@ public class Question {
      * Protected constructor, should only be used by the builder.
      */
     protected Question(String id, String theme, String description, String statement,
-            Map<Semester, Map<String, Map<String, Float>>> record, boolean pvt, String difficulty,
+            Map<Semester, Map<String, Map<String, Float>>> record, boolean pvt, int estimatedTime, String difficulty,
             List<String> difficultyGroup, List<Map<String, Boolean>> choices) {
         this.id = id;
         this.theme = theme;
@@ -179,6 +186,7 @@ public class Question {
         this.statement = statement;
         this.record = record;
         this.pvt = pvt;
+        this.estimatedTime = estimatedTime;
         this.difficulty = difficulty;
         this.difficultyGroup = difficultyGroup;
 
@@ -246,7 +254,6 @@ public class Question {
         } else {
             return gradeList.get(i);
         }
-
     }
 
     /**
@@ -264,10 +271,6 @@ public class Question {
                 .getDifficultyGroup(avg);
         this.difficulty = this.difficultyGroup.get(difficultyIndex);
     }
-
-    /**
-     *
-     */
 
     /**
      * Equality comparison. Although this object has an id, equality is checked on
@@ -294,7 +297,7 @@ public class Question {
     @Override
     public int hashCode() {
         return Objects.hash(this.id, this.theme, this.description, this.statement, this.record, this.pvt,
-                this.difficulty);
+                this.estimatedTime, this.difficulty);
     }
 
     /**
@@ -310,6 +313,7 @@ public class Question {
         builder.append("  desc: " + this.description + "\n");
         builder.append("  record: " + this.record + "\n");
         builder.append("  pvt: " + this.pvt + "\n");
+        builder.append("  estimatedTime: " + this.estimatedTime + "\n");
         builder.append("  difficulty: " + this.difficulty + "\n");
         builder.append("  difficultyGroup: " + this.difficultyGroup + "\n");
         // TODO add choices

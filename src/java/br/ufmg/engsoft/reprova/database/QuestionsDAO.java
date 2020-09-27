@@ -158,8 +158,9 @@ public class QuestionsDAO {
         }
 
         Document doc = new Document().append("theme", question.theme).append("description", question.description)
-                .append("statement", question.statement).append("record", record == null ? null : new Document(record))
-                .append("pvt", question.pvt).append("difficulty", question.difficulty);
+                .append("statement", question.statement).append("estimatedTime", question.estimatedTime)
+                .append("record", record == null ? null : new Document(record)).append("pvt", question.pvt)
+                .append("difficulty", question.difficulty);
 
         if (Environments.getInstance().getEnableMultipleChoice()) {
             doc = doc.append("choices", question.getChoices());
