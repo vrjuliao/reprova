@@ -53,9 +53,10 @@ public class Question {
     public final int estimatedTime;
 
     /**
-     * The list of choices for multiple choice.
+     * Available choices for question, used if the multiple choice feature is
+     * enabled
      */
-    private final List<Map<String, Boolean>> choices;
+    private final Map<String, Boolean> choices;
 
     /**
      * Builder for Question.
@@ -70,7 +71,7 @@ public class Question {
         protected int estimatedTime;
         protected String difficulty;
         protected List<String> difficultyGroup;
-        protected List<Map<String, Boolean>> choices;
+        protected Map<String, Boolean> choices;
 
         public Builder id(String id) {
             this.id = id;
@@ -102,7 +103,7 @@ public class Question {
             return this;
         }
 
-        public Builder choices(List<Map<String, Boolean>> choices) {
+        public Builder choices(Map<String, Boolean> choices) {
             this.choices = choices;
             return this;
         }
@@ -179,7 +180,7 @@ public class Question {
      */
     protected Question(String id, String theme, String description, String statement,
             Map<Semester, Map<String, Map<String, Float>>> record, boolean pvt, int estimatedTime, String difficulty,
-            List<String> difficultyGroup, List<Map<String, Boolean>> choices) {
+            List<String> difficultyGroup, Map<String, Boolean> choices) {
         this.id = id;
         this.theme = theme;
         this.description = description;
@@ -194,7 +195,7 @@ public class Question {
         this.choices = environments.getEnableMultipleChoice() ? choices : null;
     }
 
-    public List<Map<String, Boolean>> getChoices() {
+    public Map<String, Boolean> getChoices() {
         return this.choices;
     }
 
