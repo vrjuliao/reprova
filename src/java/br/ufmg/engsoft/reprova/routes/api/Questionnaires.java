@@ -212,6 +212,7 @@ public class Questionnaires {
                      .theme(question.theme)
                      .description(question.description)
                      .statement(question.statement)
+                     .estimatedTime(question.estimatedTime)
                      .record(question.record)
                      .pvt(question.pvt)
                      .build();

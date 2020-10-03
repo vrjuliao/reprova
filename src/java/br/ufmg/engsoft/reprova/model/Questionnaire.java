@@ -1,12 +1,10 @@
 package br.ufmg.engsoft.reprova.model;
 
 import java.util.ArrayList;
-import java.util.stream.Collectors;
-import java.util.Collections;
-import java.util.List;
 
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
-import br.ufmg.engsoft.reprova.model.difficulty.DifficultyFactory;
+import br.ufmg.engsoft.reprova.model.generator.QuestionnaireGeneration;
+import br.ufmg.engsoft.reprova.model.generator.EstimatedTimeCalculator;
 
 /**
  * The Questionnaire type
@@ -28,19 +26,16 @@ public class Questionnaire{
   /**
    * The Questionnaire's total estimated time.
    */
-  public final int totalEstimatedTime;
+  public int totalEstimatedTime;
   
-  private static final int DEFAULT_ESTIMATED_TIME_MINUTES = 60;
-  private static final int DEFAULT_QUESTIONS_COUNT = 5;
+  public static final int DEFAULT_ESTIMATED_TIME_MINUTES = 60;
+  public static final int DEFAULT_QUESTIONS_COUNT = 5;
 
   public static class Generator{
     protected String id;
     protected String averageDifficulty;
     protected int totalEstimatedTime;
     protected int questionsCount;
-    private List<Question> allQuestions;
-    private List<String> difficultyGroup;
-
 
     public Generator id(String id){
       this.id = id;
@@ -62,109 +57,17 @@ public class Questionnaire{
       return this;
     }
 
-    /**
-     * Auxiliary function that returns a list of questions with the given difficulty.
-     * Attempts to fill the returned list with the given count of questions.
-     */
-    private List<Question> getQuestionsOfDifficulty(int count, String difficulty){
-      List<Question> questions = new ArrayList<Question>();
-      List<Question> questionsOfDifficulty = this.allQuestions.stream()
-                                          .filter(q -> q.difficulty.equals(difficulty))
-                                          .collect(Collectors.toList());
-
-      Collections.shuffle(questionsOfDifficulty);
-      for (int i = 0; i < count; i++){
-        if (i >= questionsOfDifficulty.size()){
-          break;
-        }
-        questions.add(questionsOfDifficulty.get(i));
-      }
-
-      return questions;
-    }
-
-    /**
-     * Generate a new Quesitonnaire based on the parameters.
-     * Selects a collection of questions the best fit the parameters.
-     * Calls the Questionnaire's Builder.
-     */
     public Questionnaire generate(QuestionsDAO questionsDAO){
+      QuestionnaireGeneration generationChain = new QuestionnaireGeneration();
+
       Environments environments = Environments.getInstance();
-      int valueDifficultyGroup = environments.getDifficultyGroup();
-      this.difficultyGroup = new DifficultyFactory()
-                                  .getDifficulty(valueDifficultyGroup)
-                                  .getDifficulties();
+      boolean hasEstimatedTime = environments.getEnableEstimatedTime();
 
-      if (this.averageDifficulty == null){
-        this.averageDifficulty = "Average";
-      } else {
-        if (!this.difficultyGroup.contains(this.averageDifficulty)){
-          throw new IllegalArgumentException("invalid average difficulty");
-        }
-      }
-      if (this.totalEstimatedTime == 0){
-        this.totalEstimatedTime = Questionnaire.DEFAULT_ESTIMATED_TIME_MINUTES;
-      }
-      if (this.questionsCount == 0){
-        this.questionsCount = Questionnaire.DEFAULT_QUESTIONS_COUNT;
+      if (hasEstimatedTime){
+        generationChain.setNext(new EstimatedTimeCalculator());
       }
 
-      ArrayList<Question> questions = new ArrayList<Question>();
-      this.allQuestions = new ArrayList<Question>(questionsDAO.list(null, null));
-
-      if (allQuestions.size() <= this.questionsCount){
-        for(Question question : allQuestions){
-          questions.add(question);
-        }
-      } else {
-        int averageQuestionsCount = (int)Math.ceil(this.questionsCount * 0.5);
-        List<Question> averageQuestions = getQuestionsOfDifficulty(averageQuestionsCount, this.averageDifficulty);
-        questions.addAll(averageQuestions);
-
-        int remainingQuestionsCount = this.questionsCount - questions.size();
-        int easierQuestionsCount = remainingQuestionsCount % 2 == 1 ? remainingQuestionsCount/2 + 1 : remainingQuestionsCount/2;
-        int harderQuestionsCount = remainingQuestionsCount - easierQuestionsCount;
-
-        int easierDifficultyIndex = this.difficultyGroup.indexOf(this.averageDifficulty);
-        int harderDifficultyIndex = easierDifficultyIndex;
-        while (remainingQuestionsCount > 0){
-          if (harderDifficultyIndex == 0){
-            easierQuestionsCount += harderQuestionsCount;
-            harderQuestionsCount = -1;
-            harderDifficultyIndex = -1;
-          } else {
-            harderDifficultyIndex--;
-          }
-          
-          if (easierDifficultyIndex == this.difficultyGroup.size()-1){
-            harderQuestionsCount += easierQuestionsCount;
-            easierQuestionsCount = -1;
-            easierDifficultyIndex = -1;
-          } else {
-            easierDifficultyIndex++;
-          }
-
-          if (harderQuestionsCount != -1){
-            List<Question> harderQuestions = getQuestionsOfDifficulty(harderQuestionsCount, this.difficultyGroup.get(harderDifficultyIndex));
-            harderQuestionsCount -= harderQuestions.size();
-            remainingQuestionsCount -= harderQuestions.size();
-            questions.addAll(harderQuestions);
-          }
-
-          if (easierQuestionsCount != -1){
-            List<Question> easierQuestions = getQuestionsOfDifficulty(easierQuestionsCount, this.difficultyGroup.get(easierDifficultyIndex));
-            easierQuestionsCount -= easierQuestions.size();
-            remainingQuestionsCount -= easierQuestions.size();
-            questions.addAll(easierQuestions);
-          }
-        }
-      }
-
-      return new Questionnaire.Builder()
-                 .averageDifficulty(this.averageDifficulty)
-                 .totalEstimatedTime(this.totalEstimatedTime)
-                 .questions(questions)
-                 .build();
+      return generationChain.generate(questionsDAO, this.averageDifficulty, this.questionsCount, this.totalEstimatedTime);
     }
   }
 
