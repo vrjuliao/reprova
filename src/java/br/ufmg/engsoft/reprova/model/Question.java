@@ -121,142 +121,8 @@ public class Question {
         public Builder difficultyGroup(List<String> difficulty) {
             this.difficultyGroup = difficulty;
             return this;
-        }
-
-        /**
-         * Build the question.
-         *
-         * @throws IllegalArgumentException if any parameter is invalid
-         */
-        public Question build() {
-            if (theme == null) {
-                throw new IllegalArgumentException("theme mustn't be null");
-            }
-
-            if (theme.isEmpty()) {
-                throw new IllegalArgumentException("theme mustn't be empty");
-            }
-
-            if (description == null) {
-                throw new IllegalArgumentException("description mustn't be null");
-            }
-
-            if (description.isEmpty()) {
-                throw new IllegalArgumentException("description mustn't be empty");
-            }
-
-            if (this.record == null) {
-                this.record = new HashMap<Semester, Map<String, Map<String, Float>>>();
-            } else {
-                // All inner maps mustn't be null:
-                for (var entry : this.record.entrySet()) {
-                    if (entry.getValue() == null) {
-                        throw new IllegalArgumentException("inner record mustn't be null");
-                    }
-                }
-            }
-
-            this.makeOptionals();
-
-            return new Question(this.id, this.theme, this.description, this.statement, this.record, this.pvt,
-                    this.estimatedTime, this.difficulty, this.difficultyGroup, this.choices);
-        }
-
-        private void makeOptionals() {
-            Environments environments = Environments.getInstance();
-
-            if (environments.getDifficultyGroup() != 0) {
-                // TODO validate possible values (3 and 5)
-                int valueDifficultyGroup = environments.getDifficultyGroup();
-                this.difficultyGroup = new DifficultyFactory().getDifficulty(valueDifficultyGroup).getDifficulties();
-            } else {
-                this.difficultyGroup = null;
-            }
-        }
-    }
-
-    /**
-     * Protected constructor, should only be used by the builder.
-     */
-    protected Question(String id, String theme, String description, String statement,
-            Map<Semester, Map<String, Map<String, Float>>> record, boolean pvt, int estimatedTime, String difficulty,
-            List<String> difficultyGroup, Map<String, Boolean> choices) {
-        this.id = id;
-        this.theme = theme;
-        this.description = description;
-        this.statement = statement;
-        this.record = record;
-        this.pvt = pvt;
-        this.estimatedTime = estimatedTime;
-        this.difficulty = difficulty;
-        this.difficultyGroup = difficultyGroup;
-
-        Environments environments = Environments.getInstance();
-        this.choices = environments.getEnableMultipleChoice() ? choices : null;
-    }
-
-    public Map<String, Boolean> getChoices() {
-        return this.choices;
-    }
-
-    /* Calculate Grades Average */
-    public double calculateGradeAverage() {
-        double acc = 0;
-        for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
-            double acc2 = 0;
-            for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()) {
-                acc2 += innerEntry.getValue().values().stream().mapToDouble(Float::doubleValue).average().orElse(0);
-            }
-            acc += acc2 / entry.getValue().entrySet().size();
-        }
-
-        return acc / this.record.size();
-    }
-
-    /* Calculate Grades Standard Deviation */
-    public double calculateGradeStandardDeviation() {
-        double average = this.calculateGradeAverage();
-        double sum = 0.0;
-        int qtdNotas = 0;
-
-        for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
-            for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()) {
-                for (var notas : innerEntry.getValue().values()) {
-                    sum += Math.pow(notas - average, 2);
-                    qtdNotas++;
-                }
-            }
-        }
-
-        double stdDev = Math.sqrt(sum / (qtdNotas - 1));
-
-        return stdDev;
-    }
-
-    /* Calculate Grades Median */
-    public double calculateGradeMedian() {
-        List<Float> gradeList = new ArrayList<Float>();
-
-        for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
-            for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()) {
-                for (var notas : innerEntry.getValue().values()) {
-                    gradeList.add(notas);
-                }
-            }
-        }
-
-        Collections.sort(gradeList);
-        if (gradeList.size() == 0) {
-            return 0.0;
-        }
-        int i = gradeList.size() / 2;
-        if (gradeList.size() % 2 == 0) {
-            return (gradeList.get(i - 1) + gradeList.get(i)) / 2;
-        } else {
-            return gradeList.get(i);
-        }
-    }
-
+				}
+				
     /**
      * Calculate the difficulty based on the record and the difficultyGroup. Should
      * be called when changes are made to the record.
@@ -312,7 +178,8 @@ public class Question {
         this.pvt,
         this.estimatedTime,
         this.difficulty,
-        this.difficultyGroup
+				this.difficultyGroup,
+				this.choices
       );
     }
   }
@@ -329,7 +196,8 @@ public class Question {
     boolean pvt,
     int estimatedTime,
     String difficulty,
-    List<String> difficultyGroup
+		List<String> difficultyGroup,
+		Map<String, Boolean> choices
   ) {
     this.id = id;
     this.theme = theme;
@@ -339,9 +207,13 @@ public class Question {
     this.pvt = pvt;
     this.estimatedTime = estimatedTime;
     this.difficulty = difficulty;
-    this.difficultyGroup = difficultyGroup;
+		this.difficultyGroup = difficultyGroup;
+		this.choices = choices;
   }
-
+	
+	public Map<String, Boolean> getChoices() {
+		return this.choices;
+	}
 
   /* Calculate Grades Average */
   public double calculateGradeAverage() {

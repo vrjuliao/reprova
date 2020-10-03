@@ -14,6 +14,7 @@ public class Environments {
 	private boolean enableAnswers;
 	private boolean enableQuestionnaires;
 	private boolean enableEstimatedTime;
+	private boolean enableMultipleChoice;
 
 	private Environments() {		
 		Optional<String> enableAnswersEnv = Optional.ofNullable(System.getenv("ENABLE_ANSWERS"));
