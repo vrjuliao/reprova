@@ -3,6 +3,7 @@ package br.ufmg.engsoft.reprova.model;
 import java.util.Optional;
 
 public class Environments {
+
 	private static Environments environments;
 	
 	private String token;
@@ -13,7 +14,7 @@ public class Environments {
 	private boolean enableAnswers;
 	private boolean enableQuestionnaires;
 	private boolean enableEstimatedTime;
-	
+
 	private Environments() {		
 		Optional<String> enableAnswersEnv = Optional.ofNullable(System.getenv("ENABLE_ANSWERS"));
 		enableAnswersEnv.ifPresentOrElse(
@@ -33,6 +34,12 @@ public class Environments {
 			() -> this.enableEstimatedTime = false
 		);
 		
+		Optional<String> enableMultipleChoiceEnv = Optional.ofNullable(System.getenv("ENABLE_MULTIPLE_CHOICE"));
+		enableMultipleChoiceEnv.ifPresentOrElse(
+			enableMultipleChoice -> this.enableMultipleChoice = enableMultipleChoice.toLowerCase().equals("true"),
+			() -> this.enableMultipleChoice = false
+		);
+
 		Optional<String> envDifficultyGroup = Optional.ofNullable(System.getenv("DIFFICULTY_GROUP"));
 		envDifficultyGroup.ifPresentOrElse(
 			difficultyGroup -> this.difficultyGroup = Integer.parseInt(envDifficultyGroup.get()),
@@ -64,6 +71,10 @@ public class Environments {
 		return this.enableEstimatedTime;
 	}
 	
+	public boolean getEnableMultipleChoice() {
+		return this.enableMultipleChoice;
+	}
+
 	public int getDifficultyGroup() {
 		return this.difficultyGroup;
 	}
