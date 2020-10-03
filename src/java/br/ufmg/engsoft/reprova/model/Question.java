@@ -57,6 +57,10 @@ public class Question {
      * enabled
      */
     private final Map<String, Boolean> choices;
+    /**
+     * Available statistics for question
+     */
+    private final Map<String, Double> statistics;
 
     /**
      * Builder for Question.
@@ -72,6 +76,7 @@ public class Question {
         protected String difficulty;
         protected List<String> difficultyGroup;
         protected Map<String, Boolean> choices;
+        protected Map<String, Double> statistics;
 
         public Builder id(String id) {
             this.id = id;
@@ -117,6 +122,11 @@ public class Question {
             this.difficulty = difficulty;
             return this;
         }
+        
+        public Builder statistics(Map<String, Double> statistics) {
+        	this.statistics = statistics;
+        	return this;
+        }
 
         public Builder difficultyGroup(List<String> difficulty) {
             this.difficultyGroup = difficulty;
@@ -155,6 +165,10 @@ public class Question {
         }    
       }
       
+      if (this.statistics == null) {
+    	  this.statistics = new HashMap<String, Double>();
+      }
+      
      
       
       Environments environments = Environments.getInstance();
@@ -178,8 +192,9 @@ public class Question {
         this.pvt,
         this.estimatedTime,
         this.difficulty,
-				this.difficultyGroup,
-				this.choices
+		this.difficultyGroup,
+		this.choices,
+		this.statistics
       );
     }
   }
@@ -197,7 +212,8 @@ public class Question {
     int estimatedTime,
     String difficulty,
 		List<String> difficultyGroup,
-		Map<String, Boolean> choices
+		Map<String, Boolean> choices,
+		Map<String, Double> statistics
   ) {
     this.id = id;
     this.theme = theme;
@@ -207,16 +223,25 @@ public class Question {
     this.pvt = pvt;
     this.estimatedTime = estimatedTime;
     this.difficulty = difficulty;
-		this.difficultyGroup = difficultyGroup;
-		this.choices = choices;
+	this.difficultyGroup = difficultyGroup;
+	this.choices = choices;
+	this.statistics = statistics;
   }
 	
 	public Map<String, Boolean> getChoices() {
 		return this.choices;
 	}
+	
+	
+	public Map<String, Double> getStatistics(){
+    	this.statistics.put("average", this.calculateGradeAverage());
+    	this.statistics.put("Std Deviation", this.calculateGradeStandardDeviation());
+    	this.statistics.put("median", this.calculateGradeMedian());
+    	return this.statistics;
+	}
 
   /* Calculate Grades Average */
-  public double calculateGradeAverage() {
+  private double calculateGradeAverage() {
 	  double acc = 0;
 	    for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
 	      double acc2 = 0;
@@ -229,8 +254,8 @@ public class Question {
 	    return acc/this.record.size();
   }
   
-  /* Calculate Grades Standart Deviation */
-  public double calculateGradeStandardDeviation() {
+  /* Calculate Grades Standard Deviation */
+  private double calculateGradeStandardDeviation() {
 	  double average = this.calculateGradeAverage();
 	  double sum = 0.0;
 	  int qtdNotas = 0;
@@ -250,7 +275,7 @@ public class Question {
   }
   
   /* Calculate Grades Median */
-  public double calculateGradeMedian() {
+  private double calculateGradeMedian() {
 	  List<Float> gradeList = new ArrayList<Float>();
 	  
 	  for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {

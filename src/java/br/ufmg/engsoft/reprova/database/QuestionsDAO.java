@@ -8,6 +8,7 @@ import static com.mongodb.client.model.Projections.fields;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -164,6 +165,9 @@ public class QuestionsDAO {
 
         if (Environments.getInstance().getEnableMultipleChoice()) {
             doc = doc.append("choices", question.getChoices());
+        }
+        if (Environments.getInstance().getEnableQuestionStatistics()) {
+            doc = doc.append("statistics", question.getStatistics());
         }
 
         var id = question.id;

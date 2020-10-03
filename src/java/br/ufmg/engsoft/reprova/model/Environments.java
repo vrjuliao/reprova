@@ -15,12 +15,19 @@ public class Environments {
 	private boolean enableQuestionnaires;
 	private boolean enableEstimatedTime;
 	private boolean enableMultipleChoice;
+	private boolean enableQuestionStatistics;
 
 	private Environments() {		
 		Optional<String> enableAnswersEnv = Optional.ofNullable(System.getenv("ENABLE_ANSWERS"));
 		enableAnswersEnv.ifPresentOrElse(
 			enableAnswers -> this.enableAnswers = enableAnswers.toLowerCase().equals("true"),
 			() -> this.enableAnswers = false
+		);
+		
+		Optional<String> enableQuestionStatisticsEnv = Optional.ofNullable(System.getenv("ENABLE_STATISTICS"));
+		enableQuestionStatisticsEnv.ifPresentOrElse(
+				enableQuestionStatistics -> this.enableQuestionStatistics = enableQuestionStatistics.toLowerCase().equals("true"),
+			() -> this.enableQuestionStatistics = false
 		);
 		
 		Optional<String> enableQuestionnairesEnv = Optional.ofNullable(System.getenv("ENABLE_QUESTIONNAIRES"));
@@ -74,6 +81,10 @@ public class Environments {
 	
 	public boolean getEnableMultipleChoice() {
 		return this.enableMultipleChoice;
+	}
+	
+	public boolean getEnableQuestionStatistics() {
+		return this.enableQuestionStatistics;
 	}
 
 	public int getDifficultyGroup() {
