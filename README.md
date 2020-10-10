@@ -79,4 +79,45 @@ Para inserir uma questão é necessário fazer uma requisição `POST` para `loc
 
 O atributo `pvt` pode ser omitido, caso em que o Reprova o interpreta como `true`. Caso seja especificado ele pode assumir os valores tanto `true` quanto `false`, indicando se a questão é privada ou não.
 
+Para resgatar a questão é necesário fazer uma requisição `GET` para `localhost:8888/api/questions` (caso a questão seja privada, é necessário o token: `localhost:8888/api/questions?token=ABC`):
+
+```JSON
+{
+    "id": "5f81d374c5b447649987aabe",
+    "theme": "Software Engineering",
+    "description": "Question 3",
+    "record": {
+        "2020/1": {
+            "turma A": {
+                "Aluno1": 0.0,
+                "Aluno2": 5.0,
+                "Aluno3": 16.0,
+                "Aluno4": 8.0
+            }
+        }
+    },
+    "pvt": false,
+    "difficulty": "Very Hard",
+    "difficultyGroup": [
+        "Very Hard",
+        "Hard",
+        "Average",
+        "Easy",
+        "Very Easy"
+    ],
+    "estimatedTime": 17,
+    "choices": {
+        "a": true,
+        "b": false,
+        "c": false
+    },
+    "statistics": {
+        "average": 7.25,
+        "median": 6.5,
+        "Std Deviation": 6.701989754294367
+    }
+}
+```
+Observe que todas as features do nosso projeto estavam ligadas
+
 Uma coleção do Postman foi incluída no projeto para efeitos de teste (https://github.com/ghapereira/reprova/blob/master/Reprova.postman_collection.json).
