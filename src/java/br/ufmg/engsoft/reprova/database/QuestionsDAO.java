@@ -133,6 +133,12 @@ public class QuestionsDAO {
         var result = new ArrayList<Question>();
 
         doc.projection(fields(exclude("statement"))).map(this::parseDoc).into(result);
+        
+        if(Environments.getInstance().getEnableQuestionStatistics()){
+            for (var question : result){
+                question.getStatistics();
+            }
+        }
 
         return result;
     }
@@ -158,11 +164,21 @@ public class QuestionsDAO {
                     .stream().collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue));
         }
 
-        Document doc = new Document().append("theme", question.theme).append("description", question.description)
-                .append("statement", question.statement).append("estimatedTime", question.estimatedTime)
-                .append("record", record == null ? null : new Document(record)).append("pvt", question.pvt)
-                .append("difficulty", question.difficulty);
+        Document doc = new Document()
+                .append("theme", question.theme)
+                .append("description", question.description)
+                .append("statement", question.statement)
+                .append("record", record == null ? null : new Document(record))
+                .append("pvt", question.pvt);
 
+        if (Environments.getInstance().getEnableEstimatedTime()){
+            doc = doc.append("estimatedTime", question.estimatedTime);
+        }
+
+        if (Environments.getInstance().getDifficultyGroup() != 0){
+            doc = doc.append("difficulty", question.difficulty);
+        }
+        
         if (Environments.getInstance().getEnableMultipleChoice()) {
             doc = doc.append("choices", question.getChoices());
         }

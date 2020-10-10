@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import br.ufmg.engsoft.reprova.mime.json.Json;
+import br.ufmg.engsoft.reprova.model.Environments;
 import br.ufmg.engsoft.reprova.model.Questionnaire;
 
 
@@ -161,17 +162,30 @@ public class QuestionnairesDAO {
           .append("description", question.description)
           .append("statement", question.statement)
           .append("record", record == null ? null : new Document(record))
-          .append("pvt", question.pvt)
-          .append("estimatedTime", question.estimatedTime)
-          .append("difficulty", question.difficulty);
+          .append("pvt", question.pvt);
+      
+      if (Environments.getInstance().getEnableEstimatedTime()){
+        doc = doc.append("estimatedTime", question.estimatedTime);
+      }
+      
+      if (Environments.getInstance().getEnableMultipleChoice()){
+        doc = doc.append("choices", question.getChoices());
+      }
+
+      if (Environments.getInstance().getDifficultyGroup() != 0){
+        doc = doc.append("difficulty", question.difficulty);
+      }
       
       questions.add(doc);
     }
 
     Document doc = new Document()
         .append("averageDifficulty", questionnaire.averageDifficulty)
-        .append("totalEstimatedTime", questionnaire.totalEstimatedTime)
         .append("questions", questions);
+
+    if (Environments.getInstance().getEnableEstimatedTime()){
+      doc = doc.append("totalEstimatedTime", questionnaire.totalEstimatedTime);
+    }
     
     var id = questionnaire.id;
     if (id != null) {

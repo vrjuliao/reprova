@@ -50,7 +50,7 @@ public class Question {
     /**
      * The estimated time in minutes for the question to be solved
      */
-    public final int estimatedTime;
+    public final Integer estimatedTime;
 
     /**
      * Available choices for question, used if the multiple choice feature is
@@ -72,7 +72,7 @@ public class Question {
         protected String statement;
         protected Map<Semester, Map<String, Map<String, Float>>> record;
         protected boolean pvt = true;
-        protected int estimatedTime;
+        protected Integer estimatedTime;
         protected String difficulty;
         protected List<String> difficultyGroup;
         protected Map<String, Boolean> choices;
@@ -165,12 +165,22 @@ public class Question {
         }    
       }
       
-      if (this.statistics == null) {
+      if (this.statistics == null && Environments.getInstance().getEnableQuestionStatistics()) {
     	  this.statistics = new HashMap<String, Double>();
       }
+
+      if (!Environments.getInstance().getEnableEstimatedTime()){
+        this.estimatedTime = null;
+      } else {
+        this.estimatedTime = estimatedTime;
+      }
       
-     
-      
+      if (!Environments.getInstance().getEnableMultipleChoice()){
+        this.choices = null;
+      } else {
+        this.choices = choices;
+      }
+
       Environments environments = Environments.getInstance();
 
       if (environments.getDifficultyGroup() != 0) {
@@ -209,7 +219,7 @@ public class Question {
     String statement,
     Map<Semester, Map<String, Map<String, Float>>> record,
     boolean pvt,
-    int estimatedTime,
+    Integer estimatedTime,
     String difficulty,
 		List<String> difficultyGroup,
 		Map<String, Boolean> choices,

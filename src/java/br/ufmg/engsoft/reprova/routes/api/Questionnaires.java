@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 import br.ufmg.engsoft.reprova.database.QuestionnairesDAO;
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
+import br.ufmg.engsoft.reprova.model.Environments;
 import br.ufmg.engsoft.reprova.model.Question;
 import br.ufmg.engsoft.reprova.model.Questionnaire;
 import br.ufmg.engsoft.reprova.mime.json.Json;
@@ -164,6 +165,31 @@ public class Questionnaires {
     return json.render(questionnaires);
   }
 
+  /**
+   * Helper function to build Question
+   *
+   */
+  private Question buildQuestion(Question question){
+    if (Environments.getInstance().getEnableEstimatedTime()){
+      return new Question.Builder()
+                    .theme(question.theme)
+                    .description(question.description)
+                    .statement(question.statement)
+                    .estimatedTime(question.estimatedTime)
+                    .record(question.record)
+                    .pvt(question.pvt)
+                    .build();
+    }
+
+    return new Question.Builder()
+                  .theme(question.theme)
+                  .description(question.description)
+                  .statement(question.statement)
+                  .record(question.record)
+                  .pvt(question.pvt)
+                  .build();
+  }
+  
 
   /**
    * Post endpoint: add or update a questionnaire in the database.
@@ -208,14 +234,7 @@ public class Questionnaires {
     logger.info("Adding questions.");
 
     for (var question : questionnaire.questions){
-      question = new Question.Builder()
-                     .theme(question.theme)
-                     .description(question.description)
-                     .statement(question.statement)
-                     .estimatedTime(question.estimatedTime)
-                     .record(question.record)
-                     .pvt(question.pvt)
-                     .build();
+      question = buildQuestion(question);
                      
       questionsDAO.add(question);
     }
