@@ -40,7 +40,7 @@ Com isto, no Eclipse, se torna necessário finalmente configurar três variávei
  Apesar de se tratarem de variáveis de ambiente eu não consegui fazer com que o programa as lesse apenas exportando-as no terminal. A maneira pela qual consegui, graças a [esta resposta no Stack Overflow](https://stackoverflow.com/a/12810433/4357295), se baseia em configurar as variáveis de ambiente diretamente no Eclipse, o que pode ser feito segundo as imagens a seguir:
 
 ![Localidade Eclipse](https://github.com/ghapereira/reprova/blob/master/assets/location.png)
-![Variáveis](https://github.com/ghapereira/reprova/blob/master/assets/envs.png)
+![Variáveis](https://github.com/ghapereira/reprova/blob/master/assets/envs.jpg)
 
 Após configurar estas variáveis deve ser o suficiente clicar no botão de executar na própria janela de configuração das variáveis. Uma outra maneira de se executar o projeto é selecionar o arquivo principal (no caso, `br.engsoft.reprova.Reprova.java`) com o botão direito e clicar em "Run as".
 
