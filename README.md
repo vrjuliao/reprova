@@ -79,4 +79,4 @@ Para inserir uma questão é necessário fazer uma requisição `POST` para `loc
 
 O atributo `pvt` pode ser omitido, caso em que o Reprova o interpreta como `true`. Caso seja especificado ele pode assumir os valores tanto `true` quanto `false`, indicando se a questão é privada ou não.
 
-Uma coleção do Postman foi incluída no projeto para efeitos de teste.
+Uma coleção do Postman foi incluída no projeto para efeitos de teste (https://github.com/ghapereira/reprova/blob/master/Reprova.postman_collection.json).
