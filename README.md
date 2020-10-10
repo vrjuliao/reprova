@@ -46,9 +46,21 @@ Para inserir uma questão é necessário fazer uma requisição `POST` para `loc
 ```JSON
 {
     "theme": "Software Engineering",
-    "description": "Sample private description",
-    "statement": "A sample private software engineering question",
-    "pvt": false
+    "description": "Question 3",
+    "statement": "A Software Engineering question",
+    "estimatedTime": 17,
+    "pvt": false,
+    "choices": {"a": true, "b": false, "c": false},
+    "record": {
+        "2020/1": {
+            "turma A": {
+                "Aluno1": 0,
+                "Aluno2": 5,
+                "Aluno3": 16,
+                "Aluno4": 8
+            }
+        }
+    }
 }
 ```
 
