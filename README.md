@@ -26,6 +26,17 @@ Com isto, no Eclipse, se torna necessário finalmente configurar três variávei
 
 * `REPROVA_TOKEN`, que representa o token utilizado para autenticar as requisições que precisam deste recurso
 
+* `DIFFICULTY_GROUP`, habilita a função de escolher o intervalo de dificuldades das questões (3 ou 5)
+
+* `ENABLE_ANSWERS`, habilita  a funcionalidade de respostas para cada questão
+
+* `ENABLE_QUESTIONNAIRES`, habilita  a funcionalidade de geração automática de prova
+
+* `ENABLE_MULTIPLE_CHOICE`, habilita  a funcionalidade de múltipla escolha para as questões
+
+* `ENABLE_STATISTICS`, habilita  a funcionalidade de estatísticas automáticas para as questões
+
+
  Apesar de se tratarem de variáveis de ambiente eu não consegui fazer com que o programa as lesse apenas exportando-as no terminal. A maneira pela qual consegui, graças a [esta resposta no Stack Overflow](https://stackoverflow.com/a/12810433/4357295), se baseia em configurar as variáveis de ambiente diretamente no Eclipse, o que pode ser feito segundo as imagens a seguir:
 
 ![Localidade Eclipse](https://github.com/ghapereira/reprova/blob/master/assets/location.png)
