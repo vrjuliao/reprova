@@ -18,13 +18,15 @@ Alternativamente é possível iniciar o programa separadamente mas com uma inst�
 
 `docker run -p27017:27017 mvertes/alpine-mongo`
 
-Com isto, no Eclipse, se torna necessário finalmente configurar três variáveis de ambiente:
+Com isto, no Eclipse, se torna necessário finalmente configurar três variáveis de ambiente necessárias para o projeto original:
 
 * `REPROVA_MONGO`, que contém a URL do servidor Mongo
 
 * `PORT`, que representa a porta na qual o serviço do Reprova irá rodar
 
 * `REPROVA_TOKEN`, que representa o token utilizado para autenticar as requisições que precisam deste recurso
+
+Além disso, também é possível configurar as variáveis que o grupo implementou para controlar as features opcionais:
 
 * `DIFFICULTY_GROUP`, habilita a função de escolher o intervalo de dificuldades das questões (3 ou 5)
 
