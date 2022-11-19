@@ -28,12 +28,12 @@ public class Setup {
   /**
    * Logger instance.
    */
-  protected static Logger logger = LoggerFactory.getLogger(Setup.class);
+  protected static final Logger LOGGER = LoggerFactory.getLogger(Setup.class);
 
   /**
    * The port for the webserver.
    */
-  protected static final int port = Environments.getInstance().getPort();
+  protected static final int PORT = Environments.getInstance().getPort();
 
 
   /**
@@ -53,20 +53,20 @@ public class Setup {
       throw new IllegalArgumentException("questionsDAO mustn't be null");
     }
 
-    Spark.port(Setup.port);
+    Spark.port(Setup.PORT);
 
-    logger.info("Spark on port " + Setup.port);
+    LOGGER.info("Spark on port " + Setup.PORT);
 
-    logger.info("Setting up static resources.");
+    LOGGER.info("Setting up static resources.");
     Spark.staticFiles.location("/public");
 
-    logger.info("Setting up questions route:");
+    LOGGER.info("Setting up questions route:");
     var questions = new Questions(json, questionsDAO);
     questions.setup();    
   }
   
   public static void answerRoutes(Json json, AnswersDAO answersDAO) {      
-      logger.info("Setting up answers route:");
+      LOGGER.info("Setting up answers route:");
       if (answersDAO == null) {
         throw new IllegalArgumentException("answersDAO mustn't be null");
       }
@@ -75,7 +75,7 @@ public class Setup {
   }
   
   public static void questionnaireRoutes(Json json, QuestionnairesDAO questionnairesDAO, QuestionsDAO questionsDAO) {
-      logger.info("Setting up questionnaires route:");
+      LOGGER.info("Setting up questionnaires route:");
       if (questionnairesDAO == null) {
           throw new IllegalArgumentException("questionnairesDAO mustn't be null");
         }

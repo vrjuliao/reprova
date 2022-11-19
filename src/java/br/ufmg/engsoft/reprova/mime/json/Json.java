@@ -112,7 +112,7 @@ public class Json {
         );
 
         // Mongo's id property doesn't match Question.id:
-        var _id = json.getAsJsonObject().get("_id");
+        final var  _id = json.getAsJsonObject().get("_id");
 
         if (_id != null) {
           answerBuilder.id(

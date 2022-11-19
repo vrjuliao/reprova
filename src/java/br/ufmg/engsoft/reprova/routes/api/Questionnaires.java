@@ -23,19 +23,19 @@ public class Questionnaires {
   /**
    * Logger instance.
    */
-  protected static final Logger logger = LoggerFactory.getLogger(Questionnaires.class);
+  protected static final Logger LOGGER = LoggerFactory.getLogger(Questionnaires.class);
 
   /**
    * Access token.
    */
-  protected static final String token = System.getenv("REPROVA_TOKEN");
+  protected static final String TOKEN = System.getenv("REPROVA_TOKEN");
 
   /**
    * Messages.
    */
-  protected static final String unauthorized = "\"Unauthorized\"";
-  protected static final String invalid = "\"Invalid request\"";
-  protected static final String ok = "\"Ok\"";
+  protected static final String UNAUTHORIZED = "\"Unauthorized\"";
+  protected static final String INVALID = "\"Invalid request\"";
+  protected static final String OK = "\"Ok\"";
 
   /**
    * Json formatter.
@@ -92,14 +92,14 @@ public class Questionnaires {
     Spark.delete("/api/questionnaires", this::delete);
     Spark.delete("/api/questionnaires/deleteAll", this::deleteAll);
 
-    logger.info("Setup /api/questionnaires.");
+    LOGGER.info("Setup /api/questionnaires.");
   }
 
   /**
    * Check if the given token is authorized.
    */
   protected static boolean authorized(String token) {
-    return Questionnaires.token.equals(token);
+    return Questionnaires.TOKEN.equals(token);
   }
 
   /**
@@ -107,7 +107,7 @@ public class Questionnaires {
    * provided.
    */
   protected Object get(Request request, Response response) {
-    logger.info("Received questionnaires get:");
+    LOGGER.info("Received questionnaires get:");
 
     var id = request.queryParams("id");
     var auth = authorized(request.queryParams("token"));
@@ -130,17 +130,17 @@ public class Questionnaires {
 
     response.type("application/json");
 
-    logger.info("Fetching questionnaire " + id);
+    LOGGER.info("Fetching questionnaire " + id);
 
     var questionnaire = questionnairesDAO.get(id);
 
     if (questionnaire == null) {
-      logger.error("Invalid request!");
+      LOGGER.error("Invalid request!");
       response.status(400);
-      return invalid;
+      return INVALID;
     }
 
-    logger.info("Done. Responding...");
+    LOGGER.info("Done. Responding...");
 
     response.status(200);
 
@@ -154,11 +154,11 @@ public class Questionnaires {
   protected Object get(Request request, Response response, boolean auth) {
     response.type("application/json");
 
-    logger.info("Fetching questionnaires.");
+    LOGGER.info("Fetching questionnaires.");
 
     var questionnaires = questionnairesDAO.list();
 
-    logger.info("Done. Responding...");
+    LOGGER.info("Done. Responding...");
 
     response.status(200);
 
@@ -201,16 +201,16 @@ public class Questionnaires {
   protected Object post(Request request, Response response) {
     String body = request.body();
 
-    logger.info("Received questionnaires post:" + body);
+    LOGGER.info("Received questionnaires post:" + body);
 
     response.type("application/json");
 
     var token = request.queryParams("token");
 
     if (!authorized(token)) {
-      logger.info("Unauthorized token: " + token);
+      LOGGER.info("Unauthorized token: " + token);
       response.status(403);
-      return unauthorized;
+      return UNAUTHORIZED;
     }
 
     Questionnaire questionnaire;
@@ -220,18 +220,18 @@ public class Questionnaires {
         .build();
     }
     catch (Exception e) {
-      logger.error("Invalid request payload!", e);
+      LOGGER.error("Invalid request payload!", e);
       response.status(400);
-      return invalid;
+      return INVALID;
     }
 
-    logger.info("Parsed " + questionnaire.toString());
-    logger.info("Adding questionnaire.");
+    LOGGER.info("Parsed " + questionnaire.toString());
+    LOGGER.info("Adding questionnaire.");
 
     var success = questionnairesDAO.add(questionnaire);
 
-    logger.info("Added questionnaire.");
-    logger.info("Adding questions.");
+    LOGGER.info("Added questionnaire.");
+    LOGGER.info("Adding questions.");
 
     for (var question : questionnaire.questions){
       question = buildQuestion(question);
@@ -244,9 +244,9 @@ public class Questionnaires {
                : 400
     );
 
-    logger.info("Done. Responding...");
+    LOGGER.info("Done. Responding...");
 
-    return ok;
+    return OK;
   }
 
   /**
@@ -258,16 +258,16 @@ public class Questionnaires {
   protected Object generate(Request request, Response response){
     String body = request.body();
 
-    logger.info("Received questionnaires post:" + body);
+    LOGGER.info("Received questionnaires post:" + body);
 
     response.type("application/json");
 
     var token = request.queryParams("token");
 
     if (!authorized(token)) {
-      logger.info("Unauthorized token: " + token);
+      LOGGER.info("Unauthorized token: " + token);
       response.status(403);
-      return unauthorized;
+      return UNAUTHORIZED;
     }
 
     Questionnaire questionnaire;
@@ -277,26 +277,26 @@ public class Questionnaires {
         .generate(questionsDAO);
     }
     catch (Exception e) {
-      logger.error("Invalid request payload!", e);
+      LOGGER.error("Invalid request payload!", e);
       response.status(400);
-      return invalid;
+      return INVALID;
     }
 
-    logger.info("Generated " + questionnaire.toString());
-    logger.info("Adding questionnaire.");
+    LOGGER.info("Generated " + questionnaire.toString());
+    LOGGER.info("Adding questionnaire.");
 
     var success = questionnairesDAO.add(questionnaire);
 
-    logger.info("Added questionnaire.");
+    LOGGER.info("Added questionnaire.");
 
     response.status(
        success ? 200
                : 400
     );
 
-    logger.info("Done. Responding...");
+    LOGGER.info("Done. Responding...");
 
-    return ok;
+    return OK;
   }
 
 
@@ -306,7 +306,7 @@ public class Questionnaires {
    * This endpoint is for authorized access only.
    */
   protected Object delete(Request request, Response response) {
-    logger.info("Received questionnaires delete:");
+    LOGGER.info("Received questionnaires delete:");
 
     response.type("application/json");
 
@@ -314,29 +314,29 @@ public class Questionnaires {
     var token = request.queryParams("token");
 
     if (!authorized(token)) {
-      logger.info("Unauthorized token: " + token);
+      LOGGER.info("Unauthorized token: " + token);
       response.status(403);
-      return unauthorized;
+      return UNAUTHORIZED;
     }
 
     if (id == null) {
-      logger.error("Invalid request!");
+      LOGGER.error("Invalid request!");
       response.status(400);
-      return invalid;
+      return INVALID;
     }
 
-    logger.info("Deleting questionnaire " + id);
+    LOGGER.info("Deleting questionnaire " + id);
 
     var success = questionnairesDAO.remove(id);
 
-    logger.info("Done. Responding...");
+    LOGGER.info("Done. Responding...");
 
     response.status(
       success ? 200
               : 400
     );
 
-    return ok;
+    return OK;
   }
 
   /**
@@ -344,25 +344,25 @@ public class Questionnaires {
    * This endpoint is for authorized access only.
    */
   protected Object deleteAll(Request request, Response response) {
-    logger.info("Received questionnaires delete all:");
+    LOGGER.info("Received questionnaires delete all:");
 
     response.type("application/json");
 
     var token = request.queryParams("token");
 
     if (!authorized(token)) {
-      logger.info("Unauthorized token: " + token);
+      LOGGER.info("Unauthorized token: " + token);
       response.status(403);
-      return unauthorized;
+      return UNAUTHORIZED;
     }
 
-    logger.info("Deleting all questionnaires");
+    LOGGER.info("Deleting all questionnaires");
 
     boolean success = false;
     ArrayList<Questionnaire> questionnaires = new ArrayList<Questionnaire>(questionnairesDAO.list());
     for (Questionnaire questionnaire : questionnaires){
       String id = questionnaire.id;
-      logger.info("Deleting questionnaire " + id);
+      LOGGER.info("Deleting questionnaire " + id);
       
       success = questionnairesDAO.remove(id);
       if (!success){
@@ -370,13 +370,13 @@ public class Questionnaires {
       }
     }
 
-    logger.info("Done. Responding...");
+    LOGGER.info("Done. Responding...");
 
     response.status(
       success ? 200
               : 400
     );
 
-    return ok;
+    return OK;
   }
 }
