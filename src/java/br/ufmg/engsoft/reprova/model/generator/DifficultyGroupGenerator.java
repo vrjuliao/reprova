@@ -11,21 +11,21 @@ import br.ufmg.engsoft.reprova.model.Questionnaire;
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
 import br.ufmg.engsoft.reprova.model.difficulty.DifficultyFactory;
 
-public class DifficultyGroupGenerator implements IQuestionnaireGenerator{
+public class DifficultyGroupGenerator implements IQuestionnaireGenerator {
 
   /**
    * Auxiliary function that returns a list of questions with the given difficulty.
    * Attempts to fill the returned list with the given count of questions.
    */
-  private List<Question> getQuestionsOfDifficulty(ArrayList<Question> allQuestions, int count, String difficulty){
+  private List<Question> getQuestionsOfDifficulty(ArrayList<Question> allQuestions, int count, String difficulty) {
     List<Question> questions = new ArrayList<Question>();
     List<Question> questionsOfDifficulty = allQuestions.stream()
                                         .filter(q -> q.difficulty.equals(difficulty))
                                         .collect(Collectors.toList());
 
     Collections.shuffle(questionsOfDifficulty);
-    for (int i = 0; i < count; i++){
-      if (i >= questionsOfDifficulty.size()){
+    for (int i = 0; i < count; i++) {
+      if (i >= questionsOfDifficulty.size()) {
         break;
       }
       questions.add(questionsOfDifficulty.get(i));
@@ -39,32 +39,32 @@ public class DifficultyGroupGenerator implements IQuestionnaireGenerator{
    * Selects a collection of questions the best fit the parameters.
    * Calls the Questionnaire's Builder.
    */
-  public Questionnaire generate(QuestionsDAO questionsDAO, String averageDifficulty, int questionsCount, int totalEstimatedTime){
+  public Questionnaire generate(QuestionsDAO questionsDAO, String averageDifficulty, int questionsCount, int totalEstimatedTime) {
     Environments environments = Environments.getInstance();
     int valueDifficultyGroup = environments.getDifficultyGroup();
     List<String> difficultyGroup = new DifficultyFactory()
                                 .getDifficulty(valueDifficultyGroup)
                                 .getDifficulties();
 
-    if (averageDifficulty == null){
+    if (averageDifficulty == null) {
       averageDifficulty = "Average";
     } else {
-      if (!difficultyGroup.contains(averageDifficulty)){
+      if (!difficultyGroup.contains(averageDifficulty)) {
         throw new IllegalArgumentException("invalid average difficulty");
       }
     }
-    if (totalEstimatedTime == 0){
+    if (totalEstimatedTime == 0) {
       totalEstimatedTime = Questionnaire.DEFAULT_ESTIMATED_TIME_MINUTES;
     }
-    if (questionsCount == 0){
+    if (questionsCount == 0) {
       questionsCount = Questionnaire.DEFAULT_QUESTIONS_COUNT;
     }
 
     ArrayList<Question> questions = new ArrayList<Question>();
     ArrayList<Question> allQuestions = new ArrayList<Question>(questionsDAO.list(null, null));
 
-    if (allQuestions.size() <= questionsCount){
-      for(Question question : allQuestions){
+    if (allQuestions.size() <= questionsCount) {
+      for(Question question : allQuestions) {
         questions.add(question);
       }
     } else {
@@ -78,8 +78,8 @@ public class DifficultyGroupGenerator implements IQuestionnaireGenerator{
 
       int easierDifficultyIndex = difficultyGroup.indexOf(averageDifficulty);
       int harderDifficultyIndex = easierDifficultyIndex;
-      while (remainingQuestionsCount > 0){
-        if (harderDifficultyIndex == 0){
+      while (remainingQuestionsCount > 0) {
+        if (harderDifficultyIndex == 0) {
           easierQuestionsCount += harderQuestionsCount;
           harderQuestionsCount = -1;
           harderDifficultyIndex = -1;
@@ -87,7 +87,7 @@ public class DifficultyGroupGenerator implements IQuestionnaireGenerator{
           harderDifficultyIndex--;
         }
         
-        if (easierDifficultyIndex == difficultyGroup.size()-1){
+        if (easierDifficultyIndex == difficultyGroup.size()-1) {
           harderQuestionsCount += easierQuestionsCount;
           easierQuestionsCount = -1;
           easierDifficultyIndex = -1;
@@ -95,14 +95,14 @@ public class DifficultyGroupGenerator implements IQuestionnaireGenerator{
           easierDifficultyIndex++;
         }
 
-        if (harderQuestionsCount != -1){
+        if (harderQuestionsCount != -1) {
           List<Question> harderQuestions = getQuestionsOfDifficulty(allQuestions, harderQuestionsCount, difficultyGroup.get(harderDifficultyIndex));
           harderQuestionsCount -= harderQuestions.size();
           remainingQuestionsCount -= harderQuestions.size();
           questions.addAll(harderQuestions);
         }
 
-        if (easierQuestionsCount != -1){
+        if (easierQuestionsCount != -1) {
           List<Question> easierQuestions = getQuestionsOfDifficulty(allQuestions, easierQuestionsCount, difficultyGroup.get(easierDifficultyIndex));
           easierQuestionsCount -= easierQuestions.size();
           remainingQuestionsCount -= easierQuestions.size();

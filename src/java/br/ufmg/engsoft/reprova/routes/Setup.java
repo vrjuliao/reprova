@@ -78,7 +78,7 @@ public class Setup {
       LOGGER.info("Setting up questionnaires route:");
       if (questionnairesDAO == null) {
           throw new IllegalArgumentException("questionnairesDAO mustn't be null");
-        }
+      }
       var questionnaires = new Questionnaires(json, questionnairesDAO, questionsDAO);
       questionnaires.setup();
   }

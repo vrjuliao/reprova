@@ -169,13 +169,13 @@ public class Question {
     	  this.statistics = new HashMap<String, Double>();
       }
 
-      if (!Environments.getInstance().getEnableEstimatedTime()){
+      if (!Environments.getInstance().getEnableEstimatedTime()) {
         this.estimatedTime = null;
       } else {
         this.estimatedTime = estimatedTime;
       }
       
-      if (!Environments.getInstance().getEnableMultipleChoice()){
+      if (!Environments.getInstance().getEnableMultipleChoice()) {
         this.choices = null;
       } else {
         this.choices = choices;
@@ -243,7 +243,7 @@ public class Question {
 	}
 	
 	
-	public Map<String, Double> getStatistics(){
+	public Map<String, Double> getStatistics() {
     	this.statistics.put("average", this.calculateGradeAverage());
     	this.statistics.put("Std Deviation", this.calculateGradeStandardDeviation());
     	this.statistics.put("median", this.calculateGradeMedian());
@@ -271,7 +271,7 @@ public class Question {
 	  int qtdNotas = 0;
 	  
 	  for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
-	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()){
+	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()) {
 	        for(var notas: innerEntry.getValue().values()) {
 	        	sum += Math.pow(notas - average, 2);
 	        	qtdNotas++;
@@ -289,7 +289,7 @@ public class Question {
 	  List<Float> gradeList = new ArrayList<Float>();
 	  
 	  for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
-	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()){
+	      for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()) {
 	        for(var notas: innerEntry.getValue().values()) {
 	        	gradeList.add(notas);
 	        }
@@ -315,8 +315,8 @@ public class Question {
    * Calculate the difficulty based on the record and the difficultyGroup.
    * Should be called when changes are made to the record.
    */
-  public void calculateDifficulty(){
-    if (this.difficultyGroup == null){
+  public void calculateDifficulty() {
+    if (this.difficultyGroup == null) {
 			return;
     }
 

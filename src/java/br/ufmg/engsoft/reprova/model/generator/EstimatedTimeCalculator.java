@@ -3,12 +3,12 @@ package br.ufmg.engsoft.reprova.model.generator;
 import br.ufmg.engsoft.reprova.model.Question;
 import br.ufmg.engsoft.reprova.model.Questionnaire;
 
-public class EstimatedTimeCalculator extends ChainQuestionnaireGeneration{
+public class EstimatedTimeCalculator extends ChainQuestionnaireGeneration {
 
-  public Questionnaire generate(Questionnaire questionnaire){
+  public Questionnaire generate(Questionnaire questionnaire) {
     int totalEstimatedTime = 0;
     
-    for (Question question : questionnaire.questions){
+    for (Question question : questionnaire.questions) {
       totalEstimatedTime += question.estimatedTime;
     }
 

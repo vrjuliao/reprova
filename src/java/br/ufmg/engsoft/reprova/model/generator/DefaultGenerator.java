@@ -11,13 +11,13 @@ import br.ufmg.engsoft.reprova.model.Questionnaire;
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
 import br.ufmg.engsoft.reprova.model.difficulty.DifficultyFactory;
 
-public class DefaultGenerator implements IQuestionnaireGenerator{
+public class DefaultGenerator implements IQuestionnaireGenerator {
 
-  public Questionnaire generate(QuestionsDAO questionsDAO, String averageDifficulty, int questionsCount, int totalEstimatedTime){
-    if (totalEstimatedTime == 0){
+  public Questionnaire generate(QuestionsDAO questionsDAO, String averageDifficulty, int questionsCount, int totalEstimatedTime) {
+    if (totalEstimatedTime == 0) {
       totalEstimatedTime = Questionnaire.DEFAULT_ESTIMATED_TIME_MINUTES;
     }
-    if (questionsCount == 0){
+    if (questionsCount == 0) {
       questionsCount = Questionnaire.DEFAULT_QUESTIONS_COUNT;
     }
 
@@ -25,8 +25,8 @@ public class DefaultGenerator implements IQuestionnaireGenerator{
     ArrayList<Question> allQuestions = new ArrayList<Question>(questionsDAO.list(null, null));
 
     Collections.shuffle(allQuestions);
-    for (int i = 0; i < questionsCount; i++){
-      if (i >=  allQuestions.size()){
+    for (int i = 0; i < questionsCount; i++) {
+      if (i >=  allQuestions.size()) {
         break;
       }
 

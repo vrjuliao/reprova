@@ -134,8 +134,8 @@ public class QuestionsDAO {
 
         doc.projection(fields(exclude("statement"))).map(this::parseDoc).into(result);
         
-        if(Environments.getInstance().getEnableQuestionStatistics()){
-            for (var question : result){
+        if (Environments.getInstance().getEnableQuestionStatistics()) {
+            for (var question : result) {
                 question.getStatistics();
             }
         }
@@ -171,11 +171,11 @@ public class QuestionsDAO {
                 .append("record", record == null ? null : new Document(record))
                 .append("pvt", question.pvt);
 
-        if (Environments.getInstance().getEnableEstimatedTime()){
+        if (Environments.getInstance().getEnableEstimatedTime()) {
             doc = doc.append("estimatedTime", question.estimatedTime);
         }
 
-        if (Environments.getInstance().getDifficultyGroup() != 0){
+        if (Environments.getInstance().getDifficultyGroup() != 0) {
             doc = doc.append("difficulty", question.difficulty);
         }
         
@@ -211,8 +211,9 @@ public class QuestionsDAO {
      * @throws IllegalArgumentException if any parameter is null
      */
     public boolean remove(String id) {
-        if (id == null)
+        if (id == null) {
             throw new IllegalArgumentException("id mustn't be null");
+        }
 
         var result = this.collection.deleteOne(eq(new ObjectId(id))).wasAcknowledged();
 

@@ -169,8 +169,8 @@ public class Questionnaires {
    * Helper function to build Question
    *
    */
-  private Question buildQuestion(Question question){
-    if (Environments.getInstance().getEnableEstimatedTime()){
+  private Question buildQuestion(Question question) {
+    if (Environments.getInstance().getEnableEstimatedTime()) {
       return new Question.Builder()
                     .theme(question.theme)
                     .description(question.description)
@@ -233,7 +233,7 @@ public class Questionnaires {
     LOGGER.info("Added questionnaire.");
     LOGGER.info("Adding questions.");
 
-    for (var question : questionnaire.questions){
+    for (var question : questionnaire.questions) {
       question = buildQuestion(question);
                      
       questionsDAO.add(question);
@@ -255,7 +255,7 @@ public class Questionnaires {
    * Such parameters must include the averageDifficulty and may include totalEstimatedTime.
    * This endpoint is for authorized access only.
    */
-  protected Object generate(Request request, Response response){
+  protected Object generate(Request request, Response response) {
     String body = request.body();
 
     LOGGER.info("Received questionnaires post:" + body);
@@ -360,12 +360,12 @@ public class Questionnaires {
 
     boolean success = false;
     ArrayList<Questionnaire> questionnaires = new ArrayList<Questionnaire>(questionnairesDAO.list());
-    for (Questionnaire questionnaire : questionnaires){
+    for (Questionnaire questionnaire : questionnaires) {
       String id = questionnaire.id;
       LOGGER.info("Deleting questionnaire " + id);
       
       success = questionnairesDAO.remove(id);
-      if (!success){
+      if (!success) {
         break;
       }
     }
