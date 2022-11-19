@@ -20,10 +20,6 @@ import br.ufmg.engsoft.reprova.model.Environments;
  * This class is static.
  */
 public class Setup {
-  /**
-   * Static class.
-   */
-  protected Setup() { }
 
   /**
    * Logger instance.
@@ -35,7 +31,11 @@ public class Setup {
    */
   protected static final int PORT = Environments.getInstance().getPort();
 
-
+  /**
+   * Static class.
+   */
+  protected Setup() { }
+  
   /**
    * Setup the service routes.
    * This sets up the routes under the routes directory,

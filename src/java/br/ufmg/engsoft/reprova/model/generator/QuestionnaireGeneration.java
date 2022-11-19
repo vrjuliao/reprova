@@ -4,7 +4,7 @@ import br.ufmg.engsoft.reprova.model.Questionnaire;
 import br.ufmg.engsoft.reprova.model.Environments;
 import br.ufmg.engsoft.reprova.database.QuestionsDAO;
 
-public class QuestionnaireGeneration extends ChainQuestionnaireGeneration {
+public class QuestionnaireGeneration extends AbstractChainQuestionnaireGeneration {
   public QuestionnaireGeneration() {
     Environments environments = Environments.getInstance();
     int valueDifficultyGroup = environments.getDifficultyGroup();

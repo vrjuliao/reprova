@@ -1,13 +1,12 @@
 package br.ufmg.engsoft.reprova.model.generator;
 
 import br.ufmg.engsoft.reprova.model.Questionnaire;
-import java.lang.UnsupportedOperationException;
 
-abstract class ChainQuestionnaireGeneration {
-  ChainQuestionnaireGeneration next;
+abstract class AbstractChainQuestionnaireGeneration {
+  AbstractChainQuestionnaireGeneration next;
   IQuestionnaireGenerator generator;
 
-  public void setNext(ChainQuestionnaireGeneration next) {
+  public void setNext(AbstractChainQuestionnaireGeneration next) {
     this.next = next;
   }
 
