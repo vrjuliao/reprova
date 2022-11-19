@@ -202,9 +202,9 @@ public class Question {
         this.pvt,
         this.estimatedTime,
         this.difficulty,
-		this.difficultyGroup,
-		this.choices,
-		this.statistics
+        this.difficultyGroup,
+        this.choices,
+        this.statistics
       );
     }
   }
@@ -233,9 +233,9 @@ public class Question {
     this.pvt = pvt;
     this.estimatedTime = estimatedTime;
     this.difficulty = difficulty;
-	this.difficultyGroup = difficultyGroup;
-	this.choices = choices;
-	this.statistics = statistics;
+    this.difficultyGroup = difficultyGroup;
+    this.choices = choices;
+    this.statistics = statistics;
   }
 	
 	public Map<String, Boolean> getChoices() {
@@ -279,7 +279,7 @@ public class Question {
 	      }
 	    }
 	  
-	  double stdDev = Math.sqrt(sum/(qtdNotas - 1));
+	  double stdDev = Math.sqrt(sum /(qtdNotas - 1));
 
 	  return stdDev;
   }
@@ -300,11 +300,11 @@ public class Question {
 	  if(gradeList.size() == 0) {
 		  return 0.0;
 	  }
-	  int i = gradeList.size()/2;
+	  int middle = gradeList.size() / 2;
 	  if(gradeList.size() % 2 == 0) {
-		  return (gradeList.get(i-1) + gradeList.get(i))/2;
+		  return (gradeList.get(middle - 1) + gradeList.get(middle)) / 2;
 	  } else {
-		  return gradeList.get(i);
+		  return gradeList.get(middle);
 	  }
 	 	  
   }

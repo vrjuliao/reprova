@@ -42,12 +42,12 @@ public class QuestionnairesDAO {
 
   /**
    * Basic constructor.
-   * @param db    the database, mustn't be null
+   * @param mongoDB    the database, mustn't be null
    * @param json  the json formatter for the database's documents, mustn't be null
    * @throws IllegalArgumentException  if any parameter is null
    */
-  public QuestionnairesDAO(Mongo db, Json json) {
-    if (db == null) {
+  public QuestionnairesDAO(Mongo mongoDB, Json json) {
+    if (mongoDB == null) {
     	throw new IllegalArgumentException("db mustn't be null");
     }
       
@@ -55,7 +55,7 @@ public class QuestionnairesDAO {
     	throw new IllegalArgumentException("json mustn't be null");
     }
 
-    this.collection = db.getCollection("questionnaires");
+    this.collection = mongoDB.getCollection("questionnaires");
 
     this.json = json;
   }
@@ -95,22 +95,22 @@ public class QuestionnairesDAO {
 
   /**
    * Get the questionnaire with the given id.
-   * @param id  the questionnaire's id in the database.
+   * @param questionnaireId  the questionnaire's id in the database.
    * @return The questionnaire, or null if no such questionnaire.
    * @throws IllegalArgumentException  if any parameter is null
    */
-  public Questionnaire get(String id) {
-    if (id == null) {
+  public Questionnaire get(String questionnaireId) {
+    if (questionnaireId == null) {
     	throw new IllegalArgumentException("id mustn't be null");
     }
       
     var questionnaire = this.collection
-      .find(eq(new ObjectId(id)))
+      .find(eq(new ObjectId(questionnaireId)))
       .map(this::parseDoc)
       .first();
 
     if (questionnaire == null) {
-    	LOGGER.info("No such questionnaire " + id);
+    	LOGGER.info("No such questionnaire " + questionnaireId);
     }
       
     return questionnaire;
@@ -192,15 +192,15 @@ public class QuestionnairesDAO {
       doc = doc.append("totalEstimatedTime", questionnaire.totalEstimatedTime);
     }
     
-    var id = questionnaire.id;
-    if (id != null) {
+    var questionnaireId = questionnaire.id;
+    if (questionnaireId != null) {
       var result = this.collection.replaceOne(
-        eq(new ObjectId(id)),
+        eq(new ObjectId(questionnaireId)),
         doc
       );
 
       if (!result.wasAcknowledged()) {
-        LOGGER.warn("Failed to replace questionnaire " + id);
+        LOGGER.warn("Failed to replace questionnaire " + questionnaireId);
         return false;
       }
     }
@@ -216,24 +216,24 @@ public class QuestionnairesDAO {
 
   /**
    * Remove the questionnaire with the given id from the collection.
-   * @param id  the questionnaire id
+   * @param questionnaireId  the questionnaire id
    * @return Whether the given questionnaire was removed.
    * @throws IllegalArgumentException  if any parameter is null
    */
-  public boolean remove(String id) {
-    if (id == null) {
+  public boolean remove(String questionnaireId) {
+    if (questionnaireId == null) {
     	throw new IllegalArgumentException("id mustn't be null");
     }
       
     var result = this.collection.deleteOne(
-      eq(new ObjectId(id))
+      eq(new ObjectId(questionnaireId))
     ).wasAcknowledged();
 
     if (result) {
-    	LOGGER.info("Deleted questionnaire " + id);
+    	LOGGER.info("Deleted questionnaire " + questionnaireId);
     }
     else {
-    	LOGGER.warn("Failed to delete questionnaire " + id);
+    	LOGGER.warn("Failed to delete questionnaire " + questionnaireId);
     }
 
     return result;

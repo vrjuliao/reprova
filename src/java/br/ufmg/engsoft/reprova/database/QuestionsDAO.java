@@ -46,12 +46,12 @@ public class QuestionsDAO {
     /**
      * Basic constructor.
      *
-     * @param db   the database, mustn't be null
+     * @param mongoDB   the database, mustn't be null
      * @param json the json formatter for the database's documents, mustn't be null
      * @throws IllegalArgumentException if any parameter is null
      */
-    public QuestionsDAO(Mongo db, Json json) {
-        if (db == null) {
+    public QuestionsDAO(Mongo mongoDB, Json json) {
+        if (mongoDB == null) {
             throw new IllegalArgumentException("db mustn't be null");
         }
 
@@ -59,7 +59,7 @@ public class QuestionsDAO {
             throw new IllegalArgumentException("json mustn't be null");
         }
 
-        this.collection = db.getCollection("questions");
+        this.collection = mongoDB.getCollection("questions");
 
         this.json = json;
     }
@@ -93,19 +93,19 @@ public class QuestionsDAO {
     /**
      * Get the question with the given id.
      *
-     * @param id the question's id in the database.
+     * @param questionId the question's id in the database.
      * @return The question, or null if no such question.
      * @throws IllegalArgumentException if any parameter is null
      */
-    public Question get(String id) {
-        if (id == null) {
+    public Question get(String questionId) {
+        if (questionId == null) {
             throw new IllegalArgumentException("id mustn't be null");
         }
 
-        var question = this.collection.find(eq(new ObjectId(id))).map(this::parseDoc).first();
+        var question = this.collection.find(eq(new ObjectId(questionId))).map(this::parseDoc).first();
 
         if (question == null) {
-            LOGGER.info("No such question " + id);
+            LOGGER.info("No such question " + questionId);
         }
 
         return question;
@@ -113,7 +113,7 @@ public class QuestionsDAO {
 
     /**
      * List all the questions that match the given non-null parameters. The
-     * question's statement is ommited.
+     * question's statement is omitted.
      *
      * @param theme the expected theme, or null
      * @param pvt   the expected privacy, or null
@@ -186,12 +186,12 @@ public class QuestionsDAO {
             doc = doc.append("statistics", question.getStatistics());
         }
 
-        var id = question.id;
-        if (id != null) {
-            var result = this.collection.replaceOne(eq(new ObjectId(id)), doc);
+        var questionId = question.id;
+        if (questionId != null) {
+            var result = this.collection.replaceOne(eq(new ObjectId(questionId)), doc);
 
             if (!result.wasAcknowledged()) {
-                LOGGER.warn("Failed to replace question " + id);
+                LOGGER.warn("Failed to replace question " + questionId);
                 return false;
             }
         } else {
@@ -206,21 +206,21 @@ public class QuestionsDAO {
     /**
      * Remove the question with the given id from the collection.
      *
-     * @param id the question id
+     * @param questionId the question id
      * @return Whether the given question was removed.
      * @throws IllegalArgumentException if any parameter is null
      */
-    public boolean remove(String id) {
-        if (id == null) {
+    public boolean remove(String questionId) {
+        if (questionId == null) {
             throw new IllegalArgumentException("id mustn't be null");
         }
 
-        var result = this.collection.deleteOne(eq(new ObjectId(id))).wasAcknowledged();
+        var result = this.collection.deleteOne(eq(new ObjectId(questionId))).wasAcknowledged();
 
         if (result) {
-            LOGGER.info("Deleted question " + id);
+            LOGGER.info("Deleted question " + questionId);
         } else {
-            LOGGER.warn("Failed to delete question " + id);
+            LOGGER.warn("Failed to delete question " + questionId);
         }
 
         return result;

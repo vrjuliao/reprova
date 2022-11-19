@@ -78,30 +78,30 @@ public class Questions extends ReprovaRoute {
   protected Object get(Request request, Response response) {
     LOGGER.info("Received questions get:");
 
-    var id = request.queryParams("id");
+    var questionId = request.queryParams("id");
     var auth = authorized(request.queryParams("token"));
       
-    if (id == null) {
+    if (questionId == null) {
     	return this.get(request, response, auth);
     }
      
-    return this.get(request, response, id, auth);
+    return this.get(request, response, questionId, auth);
   }
 
   /**
    * Get id endpoint: fetch the specified question from the database.
    * If not authorised, and the given question is private, returns an error message.
    */
-  protected Object get(Request request, Response response, String id, boolean auth) {
-    if (id == null) {
+  protected Object get(Request request, Response response, String questionId, boolean auth) {
+    if (questionId == null) {
       throw new IllegalArgumentException("id mustn't be null");
     }
 
     response.type("application/json");
 
-    LOGGER.info("Fetching question " + id);
+    LOGGER.info("Fetching question " + questionId);
 
-    var question = questionsDAO.get(id);
+    var question = questionsDAO.get(questionId);
 
     if (question == null) {
       LOGGER.error("Invalid request!");
@@ -204,7 +204,7 @@ public class Questions extends ReprovaRoute {
 
     response.type("application/json");
 
-    var id = request.queryParams("id");
+    var questionId = request.queryParams("id");
     var token = request.queryParams("token");
 
     if (!authorized(token)) {
@@ -213,15 +213,15 @@ public class Questions extends ReprovaRoute {
       return UNAUTHORIZED;
     }
 
-    if (id == null) {
+    if (questionId == null) {
       LOGGER.error("Invalid request!");
       response.status(400);
       return INVALID;
     }
 
-    LOGGER.info("Deleting question " + id);
+    LOGGER.info("Deleting question " + questionId);
 
-    var success = questionsDAO.remove(id);
+    var success = questionsDAO.remove(questionId);
 
     LOGGER.info("Done. Responding...");
 
@@ -254,10 +254,10 @@ public class Questions extends ReprovaRoute {
     LOGGER.info("Deleting all questions");
     ArrayList<Question> questions = new ArrayList<Question>(questionsDAO.list(null, null));
     for (Question question : questions) {
-      String id = question.id;
-      LOGGER.info("Deleting question " + id);
+      String questionId = question.id;
+      LOGGER.info("Deleting question " + questionId);
       
-      success = questionsDAO.remove(id);
+      success = questionsDAO.remove(questionId);
       if (!success) {
         break;
       }

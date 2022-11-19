@@ -66,11 +66,11 @@ public class Answers extends ReprovaRoute {
       protected Object getAllAnswers(Request request, Response response) {
         LOGGER.info("Received answers get:");
 
-        String id = request.params(":questionId");
+        String questionId = request.params(":questionId");
         boolean auth = authorized(request.queryParams("token"));
         
         // TODO check how to use auth here
-        var answers = answersDAO.list(id, auth ? null : false);
+        var answers = answersDAO.list(questionId, auth ? null : false);
         
         LOGGER.info("Done. Responding...");
         response.status(200);

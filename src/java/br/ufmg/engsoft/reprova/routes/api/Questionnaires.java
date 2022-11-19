@@ -109,30 +109,30 @@ public class Questionnaires {
   protected Object get(Request request, Response response) {
     LOGGER.info("Received questionnaires get:");
 
-    var id = request.queryParams("id");
+    var questionnaireId = request.queryParams("id");
     var auth = authorized(request.queryParams("token"));
       
-    if (id == null) {
+    if (questionnaireId == null) {
     	return this.get(request, response, auth);
     }
      
-    return this.get(request, response, id, auth);
+    return this.get(request, response, questionnaireId, auth);
   }
 
   /**
    * Get id endpoint: fetch the specified questionnaire from the database.
    * If not authorised, and the given questionnaire is private, returns an error message.
    */
-  protected Object get(Request request, Response response, String id, boolean auth) {
-    if (id == null) {
+  protected Object get(Request request, Response response, String questionnaireId, boolean auth) {
+    if (questionnaireId == null) {
       throw new IllegalArgumentException("id mustn't be null");
     }
 
     response.type("application/json");
 
-    LOGGER.info("Fetching questionnaire " + id);
+    LOGGER.info("Fetching questionnaire " + questionnaireId);
 
-    var questionnaire = questionnairesDAO.get(id);
+    var questionnaire = questionnairesDAO.get(questionnaireId);
 
     if (questionnaire == null) {
       LOGGER.error("Invalid request!");
@@ -310,7 +310,7 @@ public class Questionnaires {
 
     response.type("application/json");
 
-    var id = request.queryParams("id");
+    var questionnaireId = request.queryParams("id");
     var token = request.queryParams("token");
 
     if (!authorized(token)) {
@@ -319,15 +319,15 @@ public class Questionnaires {
       return UNAUTHORIZED;
     }
 
-    if (id == null) {
+    if (questionnaireId == null) {
       LOGGER.error("Invalid request!");
       response.status(400);
       return INVALID;
     }
 
-    LOGGER.info("Deleting questionnaire " + id);
+    LOGGER.info("Deleting questionnaire " + questionnaireId);
 
-    var success = questionnairesDAO.remove(id);
+    var success = questionnairesDAO.remove(questionnaireId);
 
     LOGGER.info("Done. Responding...");
 
@@ -361,10 +361,10 @@ public class Questionnaires {
     boolean success = false;
     ArrayList<Questionnaire> questionnaires = new ArrayList<Questionnaire>(questionnairesDAO.list());
     for (Questionnaire questionnaire : questionnaires) {
-      String id = questionnaire.id;
-      LOGGER.info("Deleting questionnaire " + id);
+      String questionnaireId = questionnaire.id;
+      LOGGER.info("Deleting questionnaire " + questionnaireId);
       
-      success = questionnairesDAO.remove(id);
+      success = questionnairesDAO.remove(questionnaireId);
       if (!success) {
         break;
       }

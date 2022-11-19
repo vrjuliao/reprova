@@ -43,12 +43,12 @@ public class AnswersDAO {
 
   /**
    * Basic constructor.
-   * @param db    the database, mustn't be null
+   * @param mongoDB    the database, mustn't be null
    * @param json  the json formatter for the database's documents, mustn't be null
    * @throws IllegalArgumentException  if any parameter is null
    */
-  public AnswersDAO(Mongo db, Json json) {
-    if (db == null) {
+  public AnswersDAO(Mongo mongoDB, Json json) {
+    if (mongoDB == null) {
       throw new IllegalArgumentException("db mustn't be null");
     }
 
@@ -56,7 +56,7 @@ public class AnswersDAO {
       throw new IllegalArgumentException("json mustn't be null");
     }
 
-    this.collection = db.getCollection("answers");
+    this.collection = mongoDB.getCollection("answers");
 
     this.json = json;
   }
@@ -96,22 +96,22 @@ public class AnswersDAO {
 
   /**
    * Get the answer with the given id.
-   * @param id  the answer's id in the database.
+   * @param answerId  the answer's id in the database.
    * @return The answer, or null if no such question.
    * @throws IllegalArgumentException  if any parameter is null
    */
-  public Answer get(String id) {
-    if (id == null) {
+  public Answer get(String answerId) {
+    if (answerId == null) {
       throw new IllegalArgumentException("id mustn't be null");
     }
 
     var answer = this.collection
-      .find(eq(new ObjectId(id)))
+      .find(eq(new ObjectId(answerId)))
       .map(this::parseDoc)
       .first();
 
     if (answer == null) {
-      LOGGER.info("No such answer " + id);
+      LOGGER.info("No such answer " + answerId);
     }
 
     return answer;
@@ -173,15 +173,15 @@ public class AnswersDAO {
       .append("pvt", answer.getPvt())
       .append("questionId", questionId);
 
-    String id = answer.getId();
-    if (id != null) {
+    String answerId = answer.getId();
+    if (answerId != null) {
       var result = this.collection.replaceOne(
-        eq(new ObjectId(id)),
+        eq(new ObjectId(answerId)),
         doc
       );
 
       if (!result.wasAcknowledged()) {
-        LOGGER.warn("Failed to replace answer " + id);
+        LOGGER.warn("Failed to replace answer " + answerId);
         return false;
       }
     }
@@ -197,23 +197,23 @@ public class AnswersDAO {
 
   /**
    * Remove the answer with the given id from the collection.
-   * @param id  the answer id
+   * @param answerId  the answer id
    * @return Whether the given question was removed.
    * @throws IllegalArgumentException  if any parameter is null
    */
-  public boolean remove(String id) {
-    if (id == null) {
+  public boolean remove(String answerId) {
+    if (answerId == null) {
       throw new IllegalArgumentException("id mustn't be null");
     }
 
     var result = this.collection.deleteOne(
-      eq(new ObjectId(id))
+      eq(new ObjectId(answerId))
     ).wasAcknowledged();
 
     if (result) {
-      LOGGER.info("Deleted answer " + id);
+      LOGGER.info("Deleted answer " + answerId);
     } else {
-      LOGGER.warn("Failed to delete answer " + id);
+      LOGGER.warn("Failed to delete answer " + answerId);
     }
 
     return result;
