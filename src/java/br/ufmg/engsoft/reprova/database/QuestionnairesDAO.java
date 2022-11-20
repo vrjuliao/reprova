@@ -75,14 +75,14 @@ public class QuestionnairesDAO {
 
         var doc = document.toJson();
 
-        LOGGER.info("Fetched questionnaire: " + doc);
+        LOGGER.info("Fetched questionnaire: {}", doc);
 
         try {
             var questionnaire = json
                 .parse(doc, Questionnaire.Builder.class)
                 .build();
 
-            LOGGER.info("Parsed questionnaire: " + questionnaire);
+            LOGGER.info("Parsed questionnaire: {}", questionnaire);
             return questionnaire;
         } catch (Exception e) {
             LOGGER.error("Invalid document in database!", e);
@@ -108,7 +108,7 @@ public class QuestionnairesDAO {
             .first();
 
         if (questionnaire == null) {
-            LOGGER.info("No such questionnaire " + questionnaireId);
+            LOGGER.info("No such questionnaire {}", questionnaireId);
         }
 
         return questionnaire;
@@ -201,14 +201,14 @@ public class QuestionnairesDAO {
             );
 
             if (!result.wasAcknowledged()) {
-                LOGGER.warn("Failed to replace questionnaire " + questionnaireId);
+                LOGGER.warn("Failed to replace questionnaire {}", questionnaireId);
                 return false;
             }
         } else {
             this.collection.insertOne(doc);
         }
 
-        LOGGER.info("Stored questionnaire " + doc.get("_id"));
+        LOGGER.info("Stored questionnaire {}", doc.get("_id"));
 
         return true;
     }
@@ -230,9 +230,9 @@ public class QuestionnairesDAO {
             ).wasAcknowledged();
 
         if (result) {
-            LOGGER.info("Deleted questionnaire " + questionnaireId);
+            LOGGER.info("Deleted questionnaire {}", questionnaireId);
         } else {
-            LOGGER.warn("Failed to delete questionnaire " + questionnaireId);
+            LOGGER.warn("Failed to delete questionnaire {}", questionnaireId);
         }
 
         return result;

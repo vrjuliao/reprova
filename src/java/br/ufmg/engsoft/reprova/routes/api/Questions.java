@@ -99,7 +99,7 @@ public class Questions extends ReprovaRoute {
 
         response.type("application/json");
 
-        LOGGER.info("Fetching question " + questionId);
+        LOGGER.info("Fetching question {}", questionId);
 
         var question = questionsDAO.get(questionId);
 
@@ -110,7 +110,7 @@ public class Questions extends ReprovaRoute {
         }
 
         if (question.pvt && !auth) {
-            LOGGER.info("Unauthorized token: " + TOKEN);
+            LOGGER.info("Unauthorized token: {}", TOKEN);
             response.status(403);
             return UNAUTHORIZED;
         }
@@ -153,14 +153,14 @@ public class Questions extends ReprovaRoute {
     protected Object post(Request request, Response response) {
         String body = request.body();
 
-        LOGGER.info("Received questions post:" + body);
+        LOGGER.info("Received questions post: {}", body);
 
         response.type("application/json");
 
         var token = request.queryParams("token");
 
         if (!authorized(token)) {
-            LOGGER.info("Unauthorized token: " + token);
+            LOGGER.info("Unauthorized token: {}", token);
             response.status(403);
             return UNAUTHORIZED;
         }
@@ -176,7 +176,7 @@ public class Questions extends ReprovaRoute {
             return INVALID;
         }
 
-        LOGGER.info("Parsed " + question.toString());
+        LOGGER.info("Parsed {}", question);
         LOGGER.info("Adding question.");
 
         var success = questionsDAO.add(question);
@@ -205,7 +205,7 @@ public class Questions extends ReprovaRoute {
         var token = request.queryParams("token");
 
         if (!authorized(token)) {
-            LOGGER.info("Unauthorized token: " + token);
+            LOGGER.info("Unauthorized token: {}", token);
             response.status(403);
             return UNAUTHORIZED;
         }
@@ -216,7 +216,7 @@ public class Questions extends ReprovaRoute {
             return INVALID;
         }
 
-        LOGGER.info("Deleting question " + questionId);
+        LOGGER.info("Deleting question {}", questionId);
 
         var success = questionsDAO.remove(questionId);
 
@@ -242,7 +242,7 @@ public class Questions extends ReprovaRoute {
         var token = request.queryParams("token");
 
         if (!authorized(token)) {
-            LOGGER.info("Unauthorized token: " + token);
+            LOGGER.info("Unauthorized token: {}", token);
             response.status(403);
             return UNAUTHORIZED;
         }
@@ -252,7 +252,7 @@ public class Questions extends ReprovaRoute {
         ArrayList<Question> questions = new ArrayList<Question>(questionsDAO.list(null, null));
         for (Question question : questions) {
             String questionId = question.id;
-            LOGGER.info("Deleting question " + questionId);
+            LOGGER.info("Deleting question {}", questionId);
 
             success = questionsDAO.remove(questionId);
             if (!success) {

@@ -40,7 +40,7 @@ public class Mongo {
             .create(Mongo.ENDPOINT)
             .getDatabase(databaseName);
 
-        LOGGER.info("connected to db '" + databaseName + "'");
+        LOGGER.info("connected to db '{}'", databaseName);
     }
 
     /**

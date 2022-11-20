@@ -78,7 +78,7 @@ public class QuestionsDAO {
 
         var doc = document.toJson();
 
-        LOGGER.info("Fetched question: " + doc);
+        LOGGER.info("Fetched question: {}", doc);
 
         try {
             var question = json.parse(doc, Question.Builder.class).build();
@@ -108,7 +108,7 @@ public class QuestionsDAO {
             .first();
 
         if (question == null) {
-            LOGGER.info("No such question " + questionId);
+            LOGGER.info("No such question {}", questionId);
         }
 
         return question;
@@ -207,14 +207,14 @@ public class QuestionsDAO {
             var result = this.collection.replaceOne(eq(new ObjectId(questionId)), doc);
 
             if (!result.wasAcknowledged()) {
-                LOGGER.warn("Failed to replace question " + questionId);
+                LOGGER.warn("Failed to replace question {}", questionId);
                 return false;
             }
         } else {
             this.collection.insertOne(doc);
         }
 
-        LOGGER.info("Stored question " + doc.get("_id"));
+        LOGGER.info("Stored question {}", doc.get("_id"));
 
         return true;
     }
@@ -236,9 +236,9 @@ public class QuestionsDAO {
             ).wasAcknowledged();
 
         if (result) {
-            LOGGER.info("Deleted question " + questionId);
+            LOGGER.info("Deleted question {}", questionId);
         } else {
-            LOGGER.warn("Failed to delete question " + questionId);
+            LOGGER.warn("Failed to delete question {}", questionId);
         }
 
         return result;

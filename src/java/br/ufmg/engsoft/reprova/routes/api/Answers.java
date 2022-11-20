@@ -87,7 +87,7 @@ public class Answers extends ReprovaRoute {
     protected Object addAnswer(Request request, Response response) {
         String body = request.body();
 
-        LOGGER.info("Received answer post:" + body);
+        LOGGER.info("Received answer post: {}", body);
 
         response.type("application/json");
 
@@ -95,7 +95,7 @@ public class Answers extends ReprovaRoute {
         String questionId = request.params(":questionId");
 
         if (!authorized(token)) {
-            LOGGER.info("Unauthorized token: " + token);
+            LOGGER.info("Unauthorized token: {}", token);
             response.status(403);
             return UNAUTHORIZED;
         }
@@ -111,7 +111,7 @@ public class Answers extends ReprovaRoute {
             return INVALID;
         }
 
-        LOGGER.info("Parsed " + answer.toString());
+        LOGGER.info("Parsed {}", answer);
         LOGGER.info("Adding question.");
 
         var success = answersDAO.add(answer, questionId);

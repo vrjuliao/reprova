@@ -132,7 +132,7 @@ public class Questionnaires {
 
         response.type("application/json");
 
-        LOGGER.info("Fetching questionnaire " + questionnaireId);
+        LOGGER.info("Fetching questionnaire {}", questionnaireId);
 
         var questionnaire = questionnairesDAO.get(questionnaireId);
 
@@ -203,14 +203,14 @@ public class Questionnaires {
     protected Object post(Request request, Response response) {
         String body = request.body();
 
-        LOGGER.info("Received questionnaires post:" + body);
+        LOGGER.info("Received questionnaires post: {}", body);
 
         response.type("application/json");
 
         var token = request.queryParams("token");
 
         if (!authorized(token)) {
-            LOGGER.info("Unauthorized token: " + token);
+            LOGGER.info("Unauthorized token: {}", token);
             response.status(403);
             return UNAUTHORIZED;
         }
@@ -226,7 +226,7 @@ public class Questionnaires {
             return INVALID;
         }
 
-        LOGGER.info("Parsed " + questionnaire.toString());
+        LOGGER.info("Parsed {}", questionnaire);
         LOGGER.info("Adding questionnaire.");
 
         var success = questionnairesDAO.add(questionnaire);
@@ -261,14 +261,14 @@ public class Questionnaires {
     protected Object generate(Request request, Response response) {
         String body = request.body();
 
-        LOGGER.info("Received questionnaires post:" + body);
+        LOGGER.info("Received questionnaires post: {}", body);
 
         response.type("application/json");
 
         var token = request.queryParams("token");
 
         if (!authorized(token)) {
-            LOGGER.info("Unauthorized token: " + token);
+            LOGGER.info("Unauthorized token: {}", token);
             response.status(403);
             return UNAUTHORIZED;
         }
@@ -284,7 +284,7 @@ public class Questionnaires {
             return INVALID;
         }
 
-        LOGGER.info("Generated " + questionnaire.toString());
+        LOGGER.info("Generated {}", questionnaire);
         LOGGER.info("Adding questionnaire.");
 
         var success = questionnairesDAO.add(questionnaire);
@@ -315,7 +315,7 @@ public class Questionnaires {
         var token = request.queryParams("token");
 
         if (!authorized(token)) {
-            LOGGER.info("Unauthorized token: " + token);
+            LOGGER.info("Unauthorized token: {}", token);
             response.status(403);
             return UNAUTHORIZED;
         }
@@ -326,7 +326,7 @@ public class Questionnaires {
             return INVALID;
         }
 
-        LOGGER.info("Deleting questionnaire " + questionnaireId);
+        LOGGER.info("Deleting questionnaire {}", questionnaireId);
 
         var success = questionnairesDAO.remove(questionnaireId);
 
@@ -352,7 +352,7 @@ public class Questionnaires {
         var token = request.queryParams("token");
 
         if (!authorized(token)) {
-            LOGGER.info("Unauthorized token: " + token);
+            LOGGER.info("Unauthorized token: {}", token);
             response.status(403);
             return UNAUTHORIZED;
         }
@@ -363,7 +363,7 @@ public class Questionnaires {
         ArrayList<Questionnaire> questionnaires = new ArrayList<Questionnaire>(questionnairesDAO.list());
         for (Questionnaire questionnaire : questionnaires) {
             String questionnaireId = questionnaire.id;
-            LOGGER.info("Deleting questionnaire " + questionnaireId);
+            LOGGER.info("Deleting questionnaire {}", questionnaireId);
 
             success = questionnairesDAO.remove(questionnaireId);
             if (!success) {

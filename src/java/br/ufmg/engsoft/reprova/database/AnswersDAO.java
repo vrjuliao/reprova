@@ -76,14 +76,14 @@ public class AnswersDAO {
 
         var doc = document.toJson();
 
-        LOGGER.info("Fetched answer: " + doc);
+        LOGGER.info("Fetched answer: {}", doc);
 
         try {
             var answer = json
                 .parse(doc, Answer.Builder.class)
                 .build();
 
-            LOGGER.info("Parsed answer: " + answer);
+            LOGGER.info("Parsed answer: {}", answer);
             return answer;
         } catch (Exception e) {
             LOGGER.error("Invalid document in database!", e);
@@ -109,7 +109,7 @@ public class AnswersDAO {
             .first();
 
         if (answer == null) {
-            LOGGER.info("No such answer " + answerId);
+            LOGGER.info("No such answer {}", answerId);
         }
 
         return answer;
@@ -179,14 +179,14 @@ public class AnswersDAO {
             );
 
             if (!result.wasAcknowledged()) {
-                LOGGER.warn("Failed to replace answer " + answerId);
+                LOGGER.warn("Failed to replace answer {}", answerId);
                 return false;
             }
         } else {
             this.collection.insertOne(doc);
         }
-
-        LOGGER.info("Stored answer " + doc.get("_id"));
+        
+        LOGGER.info("Stored answer {}", doc.get("_id"));
 
         return true;
     }
@@ -208,9 +208,9 @@ public class AnswersDAO {
             ).wasAcknowledged();
 
         if (result) {
-            LOGGER.info("Deleted answer " + answerId);
+            LOGGER.info("Deleted answer {}", answerId);
         } else {
-            LOGGER.warn("Failed to delete answer " + answerId);
+            LOGGER.warn("Failed to delete answer {}", answerId);
         }
 
         return result;
