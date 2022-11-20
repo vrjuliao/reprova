@@ -80,8 +80,8 @@ public class AnswersDAO {
 
         try {
             var answer = json
-                    .parse(doc, Answer.Builder.class)
-                    .build();
+                .parse(doc, Answer.Builder.class)
+                .build();
 
             LOGGER.info("Parsed answer: " + answer);
             return answer;
