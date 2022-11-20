@@ -5,15 +5,15 @@ import br.ufmg.engsoft.reprova.model.Questionnaire;
 
 public class EstimatedTimeCalculator extends AbstractChainQuestionnaireGeneration {
 
-  @Override
-  public Questionnaire generate(Questionnaire questionnaire) {
-    int totalEstimatedTime = 0;
-    
-    for (Question question : questionnaire.questions) {
-      totalEstimatedTime += question.estimatedTime;
-    }
+    @Override
+    public Questionnaire generate(Questionnaire questionnaire) {
+        int totalEstimatedTime = 0;
 
-    questionnaire.totalEstimatedTime = totalEstimatedTime;
-    return handleGeneration(questionnaire);
-  }
+        for (Question question : questionnaire.questions) {
+            totalEstimatedTime += question.estimatedTime;
+        }
+
+        questionnaire.totalEstimatedTime = totalEstimatedTime;
+        return handleGeneration(questionnaire);
+    }
 }

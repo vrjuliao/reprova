@@ -45,8 +45,9 @@ public class QuestionsDAO {
     /**
      * Basic constructor.
      *
-     * @param mongoDB   the database, mustn't be null
-     * @param json the json formatter for the database's documents, mustn't be null
+     * @param mongoDB the database, mustn't be null
+     * @param json    the json formatter for the database's documents, mustn't be
+     *                null
      * @throws IllegalArgumentException if any parameter is null
      */
     public QuestionsDAO(Mongo mongoDB, Json json) {
@@ -81,7 +82,6 @@ public class QuestionsDAO {
 
         try {
             var question = json.parse(doc, Question.Builder.class).build();
-
             return question;
         } catch (Exception e) {
             LOGGER.error("Invalid document in database!", e);
@@ -101,7 +101,11 @@ public class QuestionsDAO {
             throw new IllegalArgumentException("id mustn't be null");
         }
 
-        var question = this.collection.find(eq(new ObjectId(questionId))).map(this::parseDoc).first();
+        var question = this.collection.find(
+                eq(new ObjectId(questionId))
+            )
+            .map(this::parseDoc)
+            .first();
 
         if (question == null) {
             LOGGER.info("No such question " + questionId);
@@ -121,18 +125,25 @@ public class QuestionsDAO {
      * @throws IllegalArgumentException if there is an invalid Question
      */
     public Collection<Question> list(String theme, Boolean pvt) {
-        var filters = Arrays.asList(theme == null ? null : eq("theme", theme), pvt == null ? null : eq("pvt", pvt))
-                .stream().filter(Objects::nonNull) // mongo won't allow null filters.
-                .collect(Collectors.toList());
+        var filters = Arrays.asList(
+                theme == null ? null : eq("theme", theme), 
+                pvt == null ? null : eq("pvt", pvt)
+            )
+            .stream().filter(Objects::nonNull) // mongo won't allow null filters.
+            .collect(Collectors.toList());
 
         var doc = filters.isEmpty() // mongo won't take null as a filter.
-                ? this.collection.find()
-                : this.collection.find(and(filters));
+            ? this.collection.find()
+            : this.collection.find(and(filters));
 
         var result = new ArrayList<Question>();
 
-        doc.projection(fields(exclude("statement"))).map(this::parseDoc).into(result);
-        
+        doc.projection(
+                fields(exclude("statement"))
+            )
+            .map(this::parseDoc)
+            .into(result);
+
         if (Environments.getInstance().getEnableQuestionStatistics()) {
             for (var question : result) {
                 question.getStatistics();
@@ -159,16 +170,22 @@ public class QuestionsDAO {
         Map<String, Object> record = null;
         if (question.record != null) {
             record = question.record // Convert the keys to string,
-                    .entrySet() // and values to object.
-                    .stream().collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue));
+                .entrySet() // and values to object.
+                .stream()
+                .collect(
+                    Collectors.toMap(
+                        e -> e.getKey().toString(), 
+                        Map.Entry::getValue
+                    )
+                );
         }
 
         Document doc = new Document()
-                .append("theme", question.theme)
-                .append("description", question.description)
-                .append("statement", question.statement)
-                .append("record", record == null ? null : new Document(record))
-                .append("pvt", question.pvt);
+            .append("theme", question.theme)
+            .append("description", question.description)
+            .append("statement", question.statement)
+            .append("record", record == null ? null : new Document(record))
+            .append("pvt", question.pvt);
 
         if (Environments.getInstance().getEnableEstimatedTime()) {
             doc = doc.append("estimatedTime", question.estimatedTime);
@@ -177,7 +194,7 @@ public class QuestionsDAO {
         if (Environments.getInstance().getDifficultyGroup() != 0) {
             doc = doc.append("difficulty", question.difficulty);
         }
-        
+
         if (Environments.getInstance().getEnableMultipleChoice()) {
             doc = doc.append("choices", question.getChoices());
         }
@@ -214,7 +231,9 @@ public class QuestionsDAO {
             throw new IllegalArgumentException("id mustn't be null");
         }
 
-        var result = this.collection.deleteOne(eq(new ObjectId(questionId))).wasAcknowledged();
+        var result = this.collection.deleteOne(
+                eq(new ObjectId(questionId))
+            ).wasAcknowledged();
 
         if (result) {
             LOGGER.info("Deleted question " + questionId);

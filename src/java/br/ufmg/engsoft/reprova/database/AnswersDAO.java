@@ -21,201 +21,198 @@ import org.slf4j.LoggerFactory;
 import br.ufmg.engsoft.reprova.mime.json.Json;
 import br.ufmg.engsoft.reprova.model.Answer;
 
-
 /**
  * DAO for Question class on mongodb.
  */
 public class AnswersDAO {
-  /**
-   * Logger instance.
-   */
-  protected static final Logger LOGGER = LoggerFactory.getLogger(AnswersDAO.class);
+    /**
+     * Logger instance.
+     */
+    protected static final Logger LOGGER = LoggerFactory.getLogger(AnswersDAO.class);
 
-  /**
-   * Json formatter.
-   */
-  protected final Json json;
+    /**
+     * Json formatter.
+     */
+    protected final Json json;
 
-  /**
-   * Questions collection.
-   */
-  protected final MongoCollection<Document> collection;
+    /**
+     * Questions collection.
+     */
+    protected final MongoCollection<Document> collection;
 
-  /**
-   * Basic constructor.
-   * @param mongoDB    the database, mustn't be null
-   * @param json  the json formatter for the database's documents, mustn't be null
-   * @throws IllegalArgumentException  if any parameter is null
-   */
-  public AnswersDAO(Mongo mongoDB, Json json) {
-    if (mongoDB == null) {
-      throw new IllegalArgumentException("db mustn't be null");
+    /**
+     * Basic constructor.
+     * 
+     * @param mongoDB the database, mustn't be null
+     * @param json    the json formatter for the database's documents, mustn't be
+     *                null
+     * @throws IllegalArgumentException if any parameter is null
+     */
+    public AnswersDAO(Mongo mongoDB, Json json) {
+        if (mongoDB == null) {
+            throw new IllegalArgumentException("db mustn't be null");
+        }
+
+        if (json == null) {
+            throw new IllegalArgumentException("json mustn't be null");
+        }
+
+        this.collection = mongoDB.getCollection("answers");
+
+        this.json = json;
     }
 
-    if (json == null) {
-      throw new IllegalArgumentException("json mustn't be null");
+    /**
+     * Parse the given document.
+     * 
+     * @param document the answer document, mustn't be null
+     * @throws IllegalArgumentException if any parameter is null
+     * @throws IllegalArgumentException if the given document is an invalid Question
+     */
+    protected Answer parseDoc(Document document) {
+        if (document == null) {
+            throw new IllegalArgumentException("document mustn't be null");
+        }
+
+        var doc = document.toJson();
+
+        LOGGER.info("Fetched answer: " + doc);
+
+        try {
+            var answer = json
+                    .parse(doc, Answer.Builder.class)
+                    .build();
+
+            LOGGER.info("Parsed answer: " + answer);
+            return answer;
+        } catch (Exception e) {
+            LOGGER.error("Invalid document in database!", e);
+            throw new IllegalArgumentException(e);
+        }
     }
 
-    this.collection = mongoDB.getCollection("answers");
+    /**
+     * Get the answer with the given id.
+     * 
+     * @param answerId the answer's id in the database.
+     * @return The answer, or null if no such question.
+     * @throws IllegalArgumentException if any parameter is null
+     */
+    public Answer get(String answerId) {
+        if (answerId == null) {
+            throw new IllegalArgumentException("id mustn't be null");
+        }
 
-    this.json = json;
-  }
+        var answer = this.collection
+            .find(eq(new ObjectId(answerId)))
+            .map(this::parseDoc)
+            .first();
 
+        if (answer == null) {
+            LOGGER.info("No such answer " + answerId);
+        }
 
-
-  /**
-   * Parse the given document.
-   * @param document  the answer document, mustn't be null
-   * @throws IllegalArgumentException  if any parameter is null
-   * @throws IllegalArgumentException  if the given document is an invalid Question
-   */
-  protected Answer parseDoc(Document document) {
-    if (document == null) {
-      throw new IllegalArgumentException("document mustn't be null");
+        return answer;
     }
 
-    var doc = document.toJson();
+    /**
+     * List all the answers that match the given non-null parameters.
+     * The question's statement is ommited.
+     * 
+     * @param theme the expected theme, or null
+     * @param pvt   the expected privacy, or null
+     * @return The answers in the collection that match the given parameters,
+     *         possibly
+     *         empty.
+     * @throws IllegalArgumentException if there is an invalid Question
+     */
+    public Collection<Answer> list(String questionId, Boolean pvt) {
+        var filters = Arrays.asList(
+                questionId == null ? null : eq("questionId", questionId),
+                pvt == null ? null : eq("pvt", pvt)
+            )
+            .stream()
+            .filter(Objects::nonNull) // mongo won't allow null filters.
+            .collect(Collectors.toList());
 
-    LOGGER.info("Fetched answer: " + doc);
+        var doc = filters.isEmpty() // mongo won't take null as a filter.
+            ? this.collection.find()
+            : this.collection.find(and(filters));
 
-    try {
-      var answer = json
-        .parse(doc, Answer.Builder.class)
-        .build();
+        var result = new ArrayList<Answer>();
 
-      LOGGER.info("Parsed answer: " + answer);
+        doc.projection(fields(exclude("statement")))
+            .map(this::parseDoc)
+            .into(result);
 
-      return answer;
-    }
-    catch (Exception e) {
-      LOGGER.error("Invalid document in database!", e);
-      throw new IllegalArgumentException(e);
-    }
-  }
-
-
-  /**
-   * Get the answer with the given id.
-   * @param answerId  the answer's id in the database.
-   * @return The answer, or null if no such question.
-   * @throws IllegalArgumentException  if any parameter is null
-   */
-  public Answer get(String answerId) {
-    if (answerId == null) {
-      throw new IllegalArgumentException("id mustn't be null");
-    }
-
-    var answer = this.collection
-      .find(eq(new ObjectId(answerId)))
-      .map(this::parseDoc)
-      .first();
-
-    if (answer == null) {
-      LOGGER.info("No such answer " + answerId);
+        return result;
     }
 
-    return answer;
-  }
+    /**
+     * Adds or updates the given answer in the database.
+     * If the given answer has an id, update, otherwise add.
+     * 
+     * @param answer   the answer to be stored
+     * @param question the question for which the answer must be stored
+     * @return Whether the answer was successfully added.
+     * @throws IllegalArgumentException if any parameter is null
+     */
+    public boolean add(Answer answer, String questionId) {
+        if (answer == null) {
+            throw new IllegalArgumentException("answer mustn't be null");
+        }
 
+        if (questionId == null) {
+            throw new IllegalArgumentException("questionId must be passed");
+        }
 
-  /**
-   * List all the answers that match the given non-null parameters.
-   * The question's statement is ommited.
-   * @param theme      the expected theme, or null
-   * @param pvt        the expected privacy, or null
-   * @return The answers in the collection that match the given parameters, possibly
-   *         empty.
-   * @throws IllegalArgumentException  if there is an invalid Question
-   */
-  public Collection<Answer> list(String questionId, Boolean pvt) {
-    var filters =
-      Arrays.asList(
-        questionId == null ? null : eq("questionId", questionId),
-        pvt == null ? null : eq("pvt", pvt)
-      )
-      .stream()
-      .filter(Objects::nonNull) // mongo won't allow null filters.
-      .collect(Collectors.toList());
+        Document doc = new Document()
+            .append("description", answer.getDescription())
+            .append("pvt", answer.getPvt())
+            .append("questionId", questionId);
 
-    var doc = filters.isEmpty() // mongo won't take null as a filter.
-      ? this.collection.find()
-      : this.collection.find(and(filters));
+        String answerId = answer.getId();
+        if (answerId != null) {
+            var result = this.collection.replaceOne(
+                eq(new ObjectId(answerId)),
+                doc
+            );
 
-    var result = new ArrayList<Answer>();
+            if (!result.wasAcknowledged()) {
+                LOGGER.warn("Failed to replace answer " + answerId);
+                return false;
+            }
+        } else {
+            this.collection.insertOne(doc);
+        }
 
-    doc.projection(fields(exclude("statement")))
-      .map(this::parseDoc)
-      .into(result);
+        LOGGER.info("Stored answer " + doc.get("_id"));
 
-    return result;
-  }
-
-
-  /**
-   * Adds or updates the given answer in the database.
-   * If the given answer has an id, update, otherwise add.
-   * @param answer  the answer to be stored
-   * @param question the question for which the answer must be stored
-   * @return Whether the answer was successfully added.
-   * @throws IllegalArgumentException  if any parameter is null
-   */
-  public boolean add(Answer answer, String questionId) {
-    if (answer == null) {
-      throw new IllegalArgumentException("answer mustn't be null");
-    }
-    
-    if (questionId == null) {
-        throw new IllegalArgumentException("questionId must be passed");
+        return true;
     }
 
-    Document doc = new Document()
-      .append("description", answer.getDescription())
-      .append("pvt", answer.getPvt())
-      .append("questionId", questionId);
+    /**
+     * Remove the answer with the given id from the collection.
+     * 
+     * @param answerId the answer id
+     * @return Whether the given question was removed.
+     * @throws IllegalArgumentException if any parameter is null
+     */
+    public boolean remove(String answerId) {
+        if (answerId == null) {
+            throw new IllegalArgumentException("id mustn't be null");
+        }
 
-    String answerId = answer.getId();
-    if (answerId != null) {
-      var result = this.collection.replaceOne(
-        eq(new ObjectId(answerId)),
-        doc
-      );
+        var result = this.collection.deleteOne(
+                eq(new ObjectId(answerId))
+            ).wasAcknowledged();
 
-      if (!result.wasAcknowledged()) {
-        LOGGER.warn("Failed to replace answer " + answerId);
-        return false;
-      }
+        if (result) {
+            LOGGER.info("Deleted answer " + answerId);
+        } else {
+            LOGGER.warn("Failed to delete answer " + answerId);
+        }
+
+        return result;
     }
-    else {
-      this.collection.insertOne(doc);
-    }
-
-    LOGGER.info("Stored answer " + doc.get("_id"));
-
-    return true;
-  }
-
-
-  /**
-   * Remove the answer with the given id from the collection.
-   * @param answerId  the answer id
-   * @return Whether the given question was removed.
-   * @throws IllegalArgumentException  if any parameter is null
-   */
-  public boolean remove(String answerId) {
-    if (answerId == null) {
-      throw new IllegalArgumentException("id mustn't be null");
-    }
-
-    var result = this.collection.deleteOne(
-      eq(new ObjectId(answerId))
-    ).wasAcknowledged();
-
-    if (result) {
-      LOGGER.info("Deleted answer " + answerId);
-    } else {
-      LOGGER.warn("Failed to delete answer " + answerId);
-    }
-
-    return result;
-  }
 }

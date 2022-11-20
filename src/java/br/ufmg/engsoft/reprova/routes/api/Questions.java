@@ -14,262 +14,259 @@ import br.ufmg.engsoft.reprova.model.Question;
 import br.ufmg.engsoft.reprova.model.ReprovaRoute;
 import br.ufmg.engsoft.reprova.mime.json.Json;
 
-
 /**
  * Questions route.
  */
 public class Questions extends ReprovaRoute {
-  /**
-   * Logger instance.
-   */
-  protected static final Logger LOGGER = LoggerFactory.getLogger(Questions.class);
+    /**
+     * Logger instance.
+     */
+    protected static final Logger LOGGER = LoggerFactory.getLogger(Questions.class);
 
+    /**
+     * Json formatter.
+     */
+    protected final Json json;
+    /**
+     * DAO for Question.
+     */
+    protected final QuestionsDAO questionsDAO;
 
-  /**
-   * Json formatter.
-   */
-  protected final Json json;
-  /**
-   * DAO for Question.
-   */
-  protected final QuestionsDAO questionsDAO;
+    /**
+     * Instantiate the questions endpoint.
+     * The setup method must be called to install the endpoint.
+     * 
+     * @param json         the json formatter
+     * @param questionsDAO the DAO for Question
+     * @throws IllegalArgumentException if any parameter is null
+     */
+    public Questions(Json json, QuestionsDAO questionsDAO) {
+        if (json == null) {
+            throw new IllegalArgumentException("json mustn't be null");
+        }
 
-  /**
-   * Instantiate the questions endpoint.
-   * The setup method must be called to install the endpoint.
-   * @param json          the json formatter
-   * @param questionsDAO  the DAO for Question
-   * @throws IllegalArgumentException  if any parameter is null
-   */
-  public Questions(Json json, QuestionsDAO questionsDAO) {
-    if (json == null) {
-      throw new IllegalArgumentException("json mustn't be null");
+        if (questionsDAO == null) {
+            throw new IllegalArgumentException("questionsDAO mustn't be null");
+        }
+
+        this.json = json;
+        this.questionsDAO = questionsDAO;
     }
 
-    if (questionsDAO == null) {
-      throw new IllegalArgumentException("questionsDAO mustn't be null");
+    /**
+     * Install the endpoint in Spark.
+     * Methods:
+     * - get
+     * - post
+     * - delete
+     */
+    public void setup() {
+        Spark.get("/api/questions", this::get);
+        Spark.post("/api/questions", this::post);
+        Spark.delete("/api/questions", this::delete);
+        Spark.delete("/api/questions/deleteAll", this::deleteAll);
+
+        LOGGER.info("Setup /api/questions.");
     }
 
-    this.json = json;
-    this.questionsDAO = questionsDAO;
-  }
+    /**
+     * Get endpoint: lists all questions, or a single question if a 'id' query
+     * parameter is
+     * provided.
+     */
+    protected Object get(Request request, Response response) {
+        LOGGER.info("Received questions get:");
 
+        var questionId = request.queryParams("id");
+        var auth = authorized(request.queryParams("token"));
 
-  /**
-   * Install the endpoint in Spark.
-   * Methods:
-   * - get
-   * - post
-   * - delete
-   */
-  public void setup() {
-    Spark.get("/api/questions", this::get);
-    Spark.post("/api/questions", this::post);
-    Spark.delete("/api/questions", this::delete);
-    Spark.delete("/api/questions/deleteAll", this::deleteAll);
+        if (questionId == null) {
+            return this.get(request, response, auth);
+        }
 
-    LOGGER.info("Setup /api/questions.");
-  }
-
-  /**
-   * Get endpoint: lists all questions, or a single question if a 'id' query parameter is
-   * provided.
-   */
-  protected Object get(Request request, Response response) {
-    LOGGER.info("Received questions get:");
-
-    var questionId = request.queryParams("id");
-    var auth = authorized(request.queryParams("token"));
-      
-    if (questionId == null) {
-    	return this.get(request, response, auth);
-    }
-     
-    return this.get(request, response, questionId, auth);
-  }
-
-  /**
-   * Get id endpoint: fetch the specified question from the database.
-   * If not authorised, and the given question is private, returns an error message.
-   */
-  protected Object get(Request request, Response response, String questionId, boolean auth) {
-    if (questionId == null) {
-      throw new IllegalArgumentException("id mustn't be null");
+        return this.get(request, response, questionId, auth);
     }
 
-    response.type("application/json");
+    /**
+     * Get id endpoint: fetch the specified question from the database.
+     * If not authorised, and the given question is private, returns an error
+     * message.
+     */
+    protected Object get(Request request, Response response, String questionId, boolean auth) {
+        if (questionId == null) {
+            throw new IllegalArgumentException("id mustn't be null");
+        }
 
-    LOGGER.info("Fetching question " + questionId);
+        response.type("application/json");
 
-    var question = questionsDAO.get(questionId);
+        LOGGER.info("Fetching question " + questionId);
 
-    if (question == null) {
-      LOGGER.error("Invalid request!");
-      response.status(400);
-      return INVALID;
+        var question = questionsDAO.get(questionId);
+
+        if (question == null) {
+            LOGGER.error("Invalid request!");
+            response.status(400);
+            return INVALID;
+        }
+
+        if (question.pvt && !auth) {
+            LOGGER.info("Unauthorized token: " + TOKEN);
+            response.status(403);
+            return UNAUTHORIZED;
+        }
+
+        LOGGER.info("Done. Responding...");
+
+        response.status(200);
+
+        return json.render(question);
     }
 
-    if (question.pvt && !auth) {
-      LOGGER.info("Unauthorized token: " + TOKEN);
-      response.status(403);
-      return UNAUTHORIZED;
+    /**
+     * Get all endpoint: fetch all questions from the database.
+     * If not authorized, fetches only public questions.
+     */
+    protected Object get(Request request, Response response, boolean auth) {
+        response.type("application/json");
+
+        LOGGER.info("Fetching questions.");
+
+        var questions = questionsDAO.list(
+            null, // theme filtering is not implemented in this endpoint.
+            auth ? null : false
+        );
+
+        LOGGER.info("Done. Responding...");
+
+        response.status(200);
+
+        return json.render(questions);
     }
 
-    LOGGER.info("Done. Responding...");
+    /**
+     * Post endpoint: add or update a question in the database.
+     * The question must be supplied in the request's body.
+     * If the question has an 'id' field, the operation is an update.
+     * Otherwise, the given question is added as a new question in the database.
+     * This endpoint is for authorized access only.
+     */
+    protected Object post(Request request, Response response) {
+        String body = request.body();
 
-    response.status(200);
+        LOGGER.info("Received questions post:" + body);
 
-    return json.render(question);
-  }
+        response.type("application/json");
 
-  /**
-   * Get all endpoint: fetch all questions from the database.
-   * If not authorized, fetches only public questions.
-   */
-  protected Object get(Request request, Response response, boolean auth) {
-    response.type("application/json");
+        var token = request.queryParams("token");
 
-    LOGGER.info("Fetching questions.");
+        if (!authorized(token)) {
+            LOGGER.info("Unauthorized token: " + token);
+            response.status(403);
+            return UNAUTHORIZED;
+        }
 
-    var questions = questionsDAO.list(
-      null, // theme filtering is not implemented in this endpoint.
-      auth ? null : false
-    );
+        Question question;
+        try {
+            question = json
+                .parse(body, Question.Builder.class)
+                .build();
+        } catch (Exception e) {
+            LOGGER.error("Invalid request payload!", e);
+            response.status(400);
+            return INVALID;
+        }
 
-    LOGGER.info("Done. Responding...");
+        LOGGER.info("Parsed " + question.toString());
+        LOGGER.info("Adding question.");
 
-    response.status(200);
+        var success = questionsDAO.add(question);
 
-    return json.render(questions);
-  }
+        response.status(
+            success ? 200
+                    : 400
+        );
 
+        LOGGER.info("Done. Responding...");
 
-  /**
-   * Post endpoint: add or update a question in the database.
-   * The question must be supplied in the request's body.
-   * If the question has an 'id' field, the operation is an update.
-   * Otherwise, the given question is added as a new question in the database.
-   * This endpoint is for authorized access only.
-   */
-  protected Object post(Request request, Response response) {
-    String body = request.body();
-
-    LOGGER.info("Received questions post:" + body);
-
-    response.type("application/json");
-
-    var token = request.queryParams("token");
-
-    if (!authorized(token)) {
-      LOGGER.info("Unauthorized token: " + token);
-      response.status(403);
-      return UNAUTHORIZED;
+        return OK;
     }
 
-    Question question;
-    try {
-      question = json
-        .parse(body, Question.Builder.class)
-        .build();
-    }
-    catch (Exception e) {
-      LOGGER.error("Invalid request payload!", e);
-      response.status(400);
-      return INVALID;
-    }
+    /**
+     * Delete endpoint: remove a question from the database.
+     * The question's id must be supplied through the 'id' query parameter.
+     * This endpoint is for authorized access only.
+     */
+    protected Object delete(Request request, Response response) {
+        LOGGER.info("Received questions delete:");
 
-    LOGGER.info("Parsed " + question.toString());
-    LOGGER.info("Adding question.");
+        response.type("application/json");
 
-    var success = questionsDAO.add(question);
+        var questionId = request.queryParams("id");
+        var token = request.queryParams("token");
 
-    response.status(
-       success ? 200
-               : 400
-    );
+        if (!authorized(token)) {
+            LOGGER.info("Unauthorized token: " + token);
+            response.status(403);
+            return UNAUTHORIZED;
+        }
 
-    LOGGER.info("Done. Responding...");
+        if (questionId == null) {
+            LOGGER.error("Invalid request!");
+            response.status(400);
+            return INVALID;
+        }
 
-    return OK;
-  }
+        LOGGER.info("Deleting question " + questionId);
 
+        var success = questionsDAO.remove(questionId);
 
-  /**
-   * Delete endpoint: remove a question from the database.
-   * The question's id must be supplied through the 'id' query parameter.
-   * This endpoint is for authorized access only.
-   */
-  protected Object delete(Request request, Response response) {
-    LOGGER.info("Received questions delete:");
+        LOGGER.info("Done. Responding...");
 
-    response.type("application/json");
+        response.status(
+            success ? 200
+                    : 400
+        );
 
-    var questionId = request.queryParams("id");
-    var token = request.queryParams("token");
-
-    if (!authorized(token)) {
-      LOGGER.info("Unauthorized token: " + token);
-      response.status(403);
-      return UNAUTHORIZED;
+        return OK;
     }
 
-    if (questionId == null) {
-      LOGGER.error("Invalid request!");
-      response.status(400);
-      return INVALID;
+    /**
+     * Delete All endpoint: remove all questions from the database.
+     * This endpoint is for authorized access only.
+     */
+    protected Object deleteAll(Request request, Response response) {
+        LOGGER.info("Received questions delete all:");
+
+        response.type("application/json");
+
+        var token = request.queryParams("token");
+
+        if (!authorized(token)) {
+            LOGGER.info("Unauthorized token: " + token);
+            response.status(403);
+            return UNAUTHORIZED;
+        }
+
+        boolean success = false;
+        LOGGER.info("Deleting all questions");
+        ArrayList<Question> questions = new ArrayList<Question>(questionsDAO.list(null, null));
+        for (Question question : questions) {
+            String questionId = question.id;
+            LOGGER.info("Deleting question " + questionId);
+
+            success = questionsDAO.remove(questionId);
+            if (!success) {
+                break;
+            }
+        }
+
+        LOGGER.info("Done. Responding...");
+
+        response.status(
+            success ? 200
+                    : 400
+        );
+
+        return OK;
     }
-
-    LOGGER.info("Deleting question " + questionId);
-
-    var success = questionsDAO.remove(questionId);
-
-    LOGGER.info("Done. Responding...");
-
-    response.status(
-      success ? 200
-              : 400
-    );
-
-    return OK;
-  }
-
-  /**
-   * Delete All endpoint: remove all questions from the database.
-   * This endpoint is for authorized access only.
-   */
-  protected Object deleteAll(Request request, Response response) {
-    LOGGER.info("Received questions delete all:");
-
-    response.type("application/json");
-
-    var token = request.queryParams("token");
-
-    if (!authorized(token)) {
-      LOGGER.info("Unauthorized token: " + token);
-      response.status(403);
-      return UNAUTHORIZED;
-    }
-
-    boolean success = false;
-    LOGGER.info("Deleting all questions");
-    ArrayList<Question> questions = new ArrayList<Question>(questionsDAO.list(null, null));
-    for (Question question : questions) {
-      String questionId = question.id;
-      LOGGER.info("Deleting question " + questionId);
-      
-      success = questionsDAO.remove(questionId);
-      if (!success) {
-        break;
-      }
-    }
-      
-    LOGGER.info("Done. Responding...");
-
-    response.status(
-      success ? 200
-              : 400
-    );
-
-    return OK;
-  }
 }
