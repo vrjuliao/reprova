@@ -69,6 +69,19 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.19.0</version>
+        <!-- <format>csv</format> -->
+        <configuration>
+          <rulesets>
+            <ruleset>/home/vrjuliao/workfolder/reprova/ruleset.xml</ruleset>
+          </rulesets>
+          <format>csv</format>
+        </configuration>
+      </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.0</version>
         <configuration>
@@ -103,5 +116,23 @@
 
   </build>
 
-
+  <reporting>
+    <plugins>
+      <plugin>
+        <artifactId>maven-pmd-plugin</artifactId>
+        <version>3.19.0</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>pmd</report>
+              <report>cpd</report>
+              <report>aggregate-pmd</report>
+              <report>aggregate-pmd-no-fork</report>
+              <report>aggregate-cpd</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>

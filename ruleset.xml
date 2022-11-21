@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<ruleset name="Custom Rules"
+    xmlns="http://pmd.sourceforge.net/ruleset/2.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+  <description>
+  This ruleset checks my code for bad stuff
+  </description>
+
+  <rule ref="category/java/design.xml/CyclomaticComplexity">
+    <properties>
+        <property name="classReportLevel" value="10000" />
+        <property name="methodReportLevel" value="6" />
+        <property name="cycloOptions" value="" />
+    </properties>
+  </rule>
+
+  <rule ref="category/java/design.xml/ExcessiveClassLength">
+    <properties>
+        <property name="minimum" value="250." />
+    </properties>
+  </rule>
+
+
+  <rule ref="category/java/design.xml/NcssCount">
+    <properties>
+      <property name="methodReportLevel" value="25" />
+      <property name="classReportLevel" value="100" />
+      <property name="ncssOptions" value="" />
+    </properties>
+  </rule>
+
+</ruleset>
