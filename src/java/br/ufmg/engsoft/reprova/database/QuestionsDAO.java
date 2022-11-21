@@ -126,7 +126,7 @@ public class QuestionsDAO {
      */
     public Collection<Question> list(String theme, Boolean pvt) {
         var filters = Arrays.asList(
-                theme == null ? null : eq("theme", theme), 
+                theme == null ? null : eq("theme", theme),
                 pvt == null ? null : eq("pvt", pvt)
             )
             .stream().filter(Objects::nonNull) // mongo won't allow null filters.
@@ -166,6 +166,11 @@ public class QuestionsDAO {
             throw new IllegalArgumentException("question mustn't be null");
         }
 
+        Document doc = this.createDoc(question);
+        return this.upsertCollection(question, doc);
+    }
+
+    private Document createDoc(Question question) {
         question.calculateDifficulty();
         Map<String, Object> record = null;
         if (question.record != null) {
@@ -174,7 +179,7 @@ public class QuestionsDAO {
                 .stream()
                 .collect(
                     Collectors.toMap(
-                        e -> e.getKey().toString(), 
+                        e -> e.getKey().toString(),
                         Map.Entry::getValue
                     )
                 );
@@ -202,6 +207,10 @@ public class QuestionsDAO {
             doc = doc.append("statistics", question.getStatistics());
         }
 
+        return doc;
+    }
+
+    private boolean upsertCollection(Question question, Document doc) {
         var questionId = question.id;
         if (questionId != null) {
             var result = this.collection.replaceOne(eq(new ObjectId(questionId)), doc);
