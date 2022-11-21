@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import br.ufmg.engsoft.reprova.mime.json.Json;
 import br.ufmg.engsoft.reprova.model.Environments;
+import br.ufmg.engsoft.reprova.model.Question;
 import br.ufmg.engsoft.reprova.model.Questionnaire;
 
 /**
@@ -40,7 +41,7 @@ public class QuestionnairesDAO {
 
     /**
      * Basic constructor.
-     * 
+     *
      * @param mongoDB the database, mustn't be null
      * @param json    the json formatter for the database's documents, mustn't be
      *                null
@@ -62,7 +63,7 @@ public class QuestionnairesDAO {
 
     /**
      * Parse the given document.
-     * 
+     *
      * @param document the question document, mustn't be null
      * @throws IllegalArgumentException if any parameter is null
      * @throws IllegalArgumentException if the given document is an invalid
@@ -92,7 +93,7 @@ public class QuestionnairesDAO {
 
     /**
      * Get the questionnaire with the given id.
-     * 
+     *
      * @param questionnaireId the questionnaire's id in the database.
      * @return The questionnaire, or null if no such questionnaire.
      * @throws IllegalArgumentException if any parameter is null
@@ -117,7 +118,7 @@ public class QuestionnairesDAO {
     /**
      * List all the questionnaires that match the given non-null parameters.
      * The questionnaire's statement is ommited.
-     * 
+     *
      * @return The questionnaires in the collection that match the given parameters,
      *         possibly
      *         empty.
@@ -138,7 +139,7 @@ public class QuestionnairesDAO {
     /**
      * Adds or updates the given questionnaire in the database.
      * If the given questionnaire has an id, update, otherwise add.
-     * 
+     *
      * @param questionnaire the questionnaire to be stored
      * @return Whether the questionnaire was successfully added.
      * @throws IllegalArgumentException if any parameter is null
@@ -148,51 +149,65 @@ public class QuestionnairesDAO {
             throw new IllegalArgumentException("questionnaire mustn't be null");
         }
 
+        Document doc = doc(questionnaire);
+	    return this.upsertCollection(questionnaire, doc);
+    }
+
+    private Document doc(Questionnaire questionnaire) {
+        ArrayList<Document> questions = questions(questionnaire);
+        Document doc = new Document().append("averageDifficulty", questionnaire.averageDifficulty).append("questions",
+                questions);
+        if (Environments.getInstance().getEnableEstimatedTime()) {
+            doc = doc.append("totalEstimatedTime", questionnaire.totalEstimatedTime);
+        }
+        return doc;
+    }
+
+    private ArrayList<Document> questions(Questionnaire questionnaire) {
         ArrayList<Document> questions = new ArrayList<Document>();
         for (var question : questionnaire.questions) {
-            Map<String, Object> record = null;
-            if (question.record != null) {
-                record = question.record // Convert the keys to string,
-                    .entrySet() // and values to object.
-                    .stream()
-                    .collect(
-                        Collectors.toMap(
-                            e -> e.getKey().toString(),
-                            Map.Entry::getValue
-                        )
-                    );
-            }
+            Document doc = this.createDoc(question);
+            questions.add(doc);
+        }
+        return questions;
+    }
 
-            Document doc = new Document()
+    private Document createDoc(Question question) {
+        Map<String, Object> record = record(question);
+        Document doc = new Document()
                 .append("theme", question.theme)
                 .append("description", question.description)
                 .append("statement", question.statement)
                 .append("record", record == null ? null : new Document(record))
                 .append("pvt", question.pvt);
 
-            if (Environments.getInstance().getEnableEstimatedTime()) {
-                doc = doc.append("estimatedTime", question.estimatedTime);
-            }
-
-            if (Environments.getInstance().getEnableMultipleChoice()) {
-                doc = doc.append("choices", question.getChoices());
-            }
-
-            if (Environments.getInstance().getDifficultyGroup() != 0) {
-                doc = doc.append("difficulty", question.difficulty);
-            }
-
-            questions.add(doc);
-        }
-
-        Document doc = new Document()
-            .append("averageDifficulty", questionnaire.averageDifficulty)
-            .append("questions", questions);
-
         if (Environments.getInstance().getEnableEstimatedTime()) {
-            doc = doc.append("totalEstimatedTime", questionnaire.totalEstimatedTime);
+            doc = doc.append("estimatedTime", question.estimatedTime);
         }
 
+        if (Environments.getInstance().getEnableMultipleChoice()) {
+            doc = doc.append("choices", question.getChoices());
+        }
+
+        if (Environments.getInstance().getDifficultyGroup() != 0) {
+            doc = doc.append("difficulty", question.difficulty);
+        }
+
+        return doc;
+    }
+
+    private Map<String, Object> record(Question question) {
+        Map<String, Object> record = null;
+        if (question.record != null) {
+            record = question.record
+                    .entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue));
+        }
+        return record;
+    }
+
+    private boolean upsertCollection(Questionnaire questionnaire, Document doc) {
         var questionnaireId = questionnaire.id;
         if (questionnaireId != null) {
             var result = this.collection.replaceOne(
@@ -215,7 +230,7 @@ public class QuestionnairesDAO {
 
     /**
      * Remove the questionnaire with the given id from the collection.
-     * 
+     *
      * @param questionnaireId the questionnaire id
      * @return Whether the given questionnaire was removed.
      * @throws IllegalArgumentException if any parameter is null
