@@ -53,7 +53,7 @@ public class Questionnaires {
     /**
      * Instantiate the questionnaires endpoint.
      * The setup method must be called to install the endpoint.
-     * 
+     *
      * @param json              the json formatter
      * @param questionnairesDAO the DAO for Questionnaire
      * @param questionsDAO      the DAO for Question
@@ -234,12 +234,7 @@ public class Questionnaires {
         LOGGER.info("Added questionnaire.");
         LOGGER.info("Adding questions.");
 
-        for (var question : questionnaire.questions) {
-            question = buildQuestion(question);
-
-            questionsDAO.add(question);
-        }
-
+        addQuestions(questionnaire);
         response.status(
             success ? 200
                     : 400
@@ -248,6 +243,17 @@ public class Questionnaires {
         LOGGER.info("Done. Responding...");
 
         return OK;
+    }
+
+    private void addQuestions(Questionnaire questionnaire) {
+        for (var question : questionnaire.questions) {
+            addQuestion(question);
+        }
+    }
+
+    private void addQuestion(Question question) {
+        question = buildQuestion(question);
+        questionsDAO.add(question);
     }
 
     /**
