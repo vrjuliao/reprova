@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
+import java.util.stream.Collectors;
+import org.bson.Document;
 import br.ufmg.engsoft.reprova.model.difficulty.DifficultyFactory;
 
 /**
@@ -171,14 +172,10 @@ public class Question {
 
             if (!Environments.getInstance().getEnableEstimatedTime()) {
                 this.estimatedTime = null;
-            } else {
-                this.estimatedTime = estimatedTime;
             }
 
             if (!Environments.getInstance().getEnableMultipleChoice()) {
                 this.choices = null;
-            } else {
-                this.choices = choices;
             }
 
             Environments environments = Environments.getInstance();
@@ -186,45 +183,23 @@ public class Question {
             if (environments.getDifficultyGroup() != 0) {
                 // TODO validate possible values (3 and 5)
                 int valueDifficultyGroup = environments.getDifficultyGroup();
-                this.difficultyGroup = new DifficultyFactory()
-                    .getDifficulty(valueDifficultyGroup)
-                    .getDifficulties();
+                this.difficultyGroup = new DifficultyFactory().getDifficulty(valueDifficultyGroup).getDifficulties();
             } else {
                 this.difficultyGroup = null;
             }
 
-            return new Question(
-                this.id,
-                this.theme,
-                this.description,
-                this.statement,
-                this.record,
-                this.pvt,
-                this.estimatedTime,
-                this.difficulty,
-                this.difficultyGroup,
-                this.choices,
-                this.statistics
-            );
+            return new Question(this.id, this.theme, this.description, this.statement, this.record, this.pvt,
+                    this.estimatedTime, this.difficulty, this.difficultyGroup, this.choices, this.statistics);
         }
     }
 
     /**
      * Protected constructor, should only be used by the builder.
      */
-    protected Question(
-        String id,
-        String theme,
-        String description,
-        String statement,
-        Map<Semester, Map<String, Map<String, Float>>> record,
-        boolean pvt,
-        Integer estimatedTime,
-        String difficulty,
-        List<String> difficultyGroup,
-        Map<String, Boolean> choices,
-        Map<String, Double> statistics
-    ) {
+    protected Question(String id, String theme, String description, String statement,
+            Map<Semester, Map<String, Map<String, Float>>> record, boolean pvt, Integer estimatedTime,
+            String difficulty, List<String> difficultyGroup, Map<String, Boolean> choices,
+            Map<String, Double> statistics) {
         this.id = id;
         this.theme = theme;
         this.description = description;
@@ -243,84 +218,25 @@ public class Question {
     }
 
     public Map<String, Double> getStatistics() {
-        this.statistics.put("average", this.calculateGradeAverage());
-        this.statistics.put("Std Deviation", this.calculateGradeStandardDeviation());
-        this.statistics.put("median", this.calculateGradeMedian());
+        this.statistics.put("average", QuestionCalculations.calculateGradeAverage(this.record));
+        this.statistics.put("Std Deviation", QuestionCalculations.calculateGradeStandardDeviation(this.record));
+        this.statistics.put("median", QuestionCalculations.calculateGradeMedian(this.record));
         return this.statistics;
     }
 
-    /* Calculate Grades Average */
-    private double calculateGradeAverage() {
-        double acc = 0;
-        for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
-            double acc2 = 0;
-            for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()) {
-                acc2 += innerEntry.getValue().values().stream().mapToDouble(Float::doubleValue).average().orElse(0);
-            }
-            acc += acc2 / entry.getValue().entrySet().size();
-        }
-
-        return acc / this.record.size();
-    }
-
-    /* Calculate Grades Standard Deviation */
-    private double calculateGradeStandardDeviation() {
-        double average = this.calculateGradeAverage();
-        double sum = 0.0;
-        int qtdNotas = 0;
-
-        for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
-            for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()) {
-                for (var notas : innerEntry.getValue().values()) {
-                    sum += Math.pow(notas - average, 2);
-                    qtdNotas++;
-                }
-            }
-        }
-
-        double stdDev = Math.sqrt(sum / (qtdNotas - 1));
-
-        return stdDev;
-    }
-
-    /* Calculate Grades Median */
-    private double calculateGradeMedian() {
-        List<Float> gradeList = new ArrayList<Float>();
-
-        for (Map.Entry<Semester, Map<String, Map<String, Float>>> entry : this.record.entrySet()) {
-            for (Map.Entry<String, Map<String, Float>> innerEntry : entry.getValue().entrySet()) {
-                for (var notas : innerEntry.getValue().values()) {
-                    gradeList.add(notas);
-                }
-            }
-        }
-
-        Collections.sort(gradeList);
-        if (gradeList.size() == 0) {
-            return 0.0;
-        }
-        int middle = gradeList.size() / 2;
-        if (gradeList.size() % 2 == 0) {
-            return (gradeList.get(middle - 1) + gradeList.get(middle)) / 2;
-        } else {
-            return gradeList.get(middle);
-        }
-
-    }
-
     /**
-     * Calculate the difficulty based on the record and the difficultyGroup.
-     * Should be called when changes are made to the record.
+     * Calculate the difficulty based on the record and the difficultyGroup. Should
+     * be called when changes are made to the record.
      */
     public void calculateDifficulty() {
         if (this.difficultyGroup == null) {
             return;
         }
 
-        double avg = calculateGradeAverage();
+        double avg = QuestionCalculations.calculateGradeAverage(this.record);
 
         int difficultyIndex = new DifficultyFactory().getDifficulty(this.difficultyGroup.size())
-            .getDifficultyGroup(avg);
+                .getDifficultyGroup(avg);
         this.difficulty = this.difficultyGroup.get(difficultyIndex);
     }
 
@@ -341,15 +257,15 @@ public class Question {
         var question = (Question) obj;
 
         return this.id.equals(question.id) && this.theme.equals(question.theme)
-            && this.description.equals(question.description) && this.statement.equals(question.statement)
-            && this.record.equals(question.record) && this.pvt == question.pvt
-            && this.difficulty.equals(question.difficulty);
+                && this.description.equals(question.description) && this.statement.equals(question.statement)
+                && this.record.equals(question.record) && this.pvt == question.pvt
+                && this.difficulty.equals(question.difficulty);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(this.id, this.theme, this.description, this.statement, this.record, this.pvt,
-            this.estimatedTime, this.difficulty);
+                this.estimatedTime, this.difficulty);
     }
 
     /**
@@ -375,5 +291,56 @@ public class Question {
         }
 
         return builder.toString();
+    }
+
+    /**
+     * Helper function to build Question
+     */
+    public Question buildQuestion() {
+        if (Environments.getInstance().getEnableEstimatedTime()) {
+            return new Question.Builder().theme(this.theme).description(this.description).statement(this.statement)
+                    .estimatedTime(this.estimatedTime).record(this.record).pvt(this.pvt).build();
+        }
+        return new Question.Builder().theme(this.theme).description(this.description).statement(this.statement)
+                .record(this.record).pvt(this.pvt).build();
+    }
+
+    public Document createDoc() {
+        calculateDifficulty();
+        Map<String, Object> record = record2();
+        Document doc = new Document().append("theme", this.theme).append("description", this.description)
+                .append("statement", this.statement).append("record", record == null ? null : new Document(record))
+                .append("pvt", this.pvt);
+        if (Environments.getInstance().getEnableEstimatedTime()) {
+            doc = doc.append("estimatedTime", this.estimatedTime);
+        }
+        if (Environments.getInstance().getDifficultyGroup() != 0) {
+            doc = doc.append("difficulty", this.difficulty);
+        }
+        if (Environments.getInstance().getEnableMultipleChoice()) {
+            doc = doc.append("choices", getChoices());
+        }
+        if (Environments.getInstance().getEnableQuestionStatistics()) {
+            doc = doc.append("statistics", getStatistics());
+        }
+        return doc;
+    }
+
+    private Map<String, Object> record2() {
+        Map<String, Object> record = null;
+        if (this.record != null) {
+            record = this.record.entrySet().stream()
+                    .collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue));
+        }
+        return record;
+    }
+
+    public Map<String, Object> record() {
+        Map<String, Object> record = null;
+        if (this.record != null) {
+            record = this.record.entrySet().stream()
+                    .collect(Collectors.toMap(e -> e.getKey().toString(), Map.Entry::getValue));
+        }
+        return record;
     }
 }
