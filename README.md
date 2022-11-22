@@ -1,24 +1,31 @@
 # Reprova
 
-Trabalho prático da disciplina de Reuso de Software, DCC/UFMG, 2020/1
+Trabalho prático da disciplina de Medição e Qualidade de Software, DCC/UFMG, 2022/2
 
-## Instruções de construção/ambiente (Eclipse)
+## Instruções para a construção do programa e configuração do ambiente (Sistemas Unix)
 
-A forma mais simples de se importar e configurar o projeto é utilizando a IDE [Eclipse](https://www.eclipse.org/). Após instalar e abrir o Eclipse, basta importar o diretório no qual este projeto foi baixado.
+Os requisitos necessários para que o programa seja construído e rode corretamente são:
 
-## Instruções de construção/ambiente (UNIX)
+* IDE [Eclipse](https://www.eclipse.org/), ou outra IDE que funcione com a linguagem Java e permita a configuração de variáveis de ambiente.
 
-O makefile do projeto contém instruções para construção do projeto utilizando [Maven](https://maven.apache.org/), ferramenta de gerenciamento de projetos Java. Para construir o projeto é necessário primeiro [instalar o Maven](https://maven.apache.org/install.html). No tutorial de instalação se menciona o uso da variável de ambiente `JAVA_HOME`; instruções para sua configuração em MacOS pode ser encontrada [aqui](https://mkyong.com/java/how-to-set-java_home-environment-variable-on-mac-os-x/).
+* A ferramenta de gerenciamento de projetos Java [Maven](https://maven.apache.org/), necessária devido ao makefile do projeto. Instruções para configuração em MacOS pode ser encontrada [aqui](https://mkyong.com/java/how-to-set-java_home-environment-variable-on-mac-os-x/).
 
-Com o mvn instalado, basta rodar o comando `make build` (considerando que o programa `make` esteja instalado).
+* O programa para a conexão com o banco de dados MongoDB [Docker Desktop](https://www.docker.com/products/docker-desktop/).
 
-A execução do programa, entretanto, depende de um banco de dados MongoDB funcionando. Para este fim existe um arquivo `docker-compose.yml` no diretório raiz do projeto. Para executá-lo basta ter o Docker Desktop instalado em sua máquina e executar o comando `docker-compose up` no mesmo diretório no qual o arquivo `docker-compose.yml` está presente. Este comando irá levantar o container do MongoDB  e um container contendo o projeto.
+Na pasta raiz do projeto, com o Maven devidamente instalado, basta rodar o comando `make build` no terminal. Em caso de erros de permissão, deve-se usar `sudo`.
 
-Alternativamente é possível iniciar o programa separadamente mas com uma instância do MongoDB sendo executada no local especificado no código. Esta alternativa também é facilitada pelo uso de Docker, bastando levantar a imagem utilizada no compose via `docker run`:
+Em seguida, deve ser feita a ligação com o banco de dados MongoDB. Deve-se executar o comando `docker-compose up`. Isto vai utilizar o arquivo do diretório raiz do Reprova `docker-compose.yml` para levantar o container do MongoDB e um container contendo o projeto.
 
-`docker run -p27017:27017 mvertes/alpine-mongo`
+Obs.: Como alternativa, é possível iniciar o programa separadamente mas com uma instância do MongoDB sendo executada no local especificado no código. Para isso é utilizado o comando no Docker: `docker run -p27017:27017 mvertes/alpine-mongo`.
 
-Com isto, no Eclipse, se torna necessário finalmente configurar três variáveis de ambiente necessárias para o projeto original:
+Na IDE Eclipse, deve-se importar o diretório no qual este projeto foi baixado. Assim, poderá ser feita a configuração das variáveis de ambiente necessárias para o funcionamento do programa.
+Essas configurações podem ser feitas diretamente pela IDE. Isso é feito com a seleção do diretório raiz do projeto e como o acesso pelo menu `Run` --> `Run Configuration` --> aba `Environment`. As figuras a seguir mostram o caminho a ser seguido.
+
+
+![Localidade Eclipse](https://github.com/ghapereira/reprova/blob/master/assets/location.png)
+![Variáveis](https://github.com/ghapereira/reprova/blob/master/assets/envs.jpg)
+
+As três primeiras variáveis são fundamentais para a execução do programa. Em seguida, podem ser configurados diferentes parâmetros a serem exibidos de acordo com o usuário. São elas:
 
 * `REPROVA_MONGO`, que contém a URL do servidor Mongo
 
@@ -26,7 +33,7 @@ Com isto, no Eclipse, se torna necessário finalmente configurar três variávei
 
 * `REPROVA_TOKEN`, que representa o token utilizado para autenticar as requisições que precisam deste recurso
 
-Além disso, também é possível configurar as variáveis que o grupo implementou para controlar as features opcionais:
+e
 
 * `DIFFICULTY_GROUP`, habilita a função de escolher o intervalo de dificuldades das questões (3 ou 5)
 
@@ -38,23 +45,18 @@ Além disso, também é possível configurar as variáveis que o grupo implement
 
 * `ENABLE_STATISTICS`, habilita  a funcionalidade de estatísticas automáticas para as questões
 
+* `ENABLE_ESTIMATED_TIME`, habilita a funcionalidade de mostrar o tempo estimado para resolver uma questão
 
- Apesar de se tratarem de variáveis de ambiente eu não consegui fazer com que o programa as lesse apenas exportando-as no terminal. A maneira pela qual consegui, graças a [esta resposta no Stack Overflow](https://stackoverflow.com/a/12810433/4357295), se baseia em configurar as variáveis de ambiente diretamente no Eclipse, o que pode ser feito segundo as imagens a seguir:
+Com isso, basta aplicar as mudanças e clicar no botão `Run`. Pronto!
 
-![Localidade Eclipse](https://github.com/ghapereira/reprova/blob/master/assets/location.png)
-![Variáveis](https://github.com/ghapereira/reprova/blob/master/assets/envs.jpg)
+Obs.: Em caso de problemas, pode-se tentar utilizar os passos do guia do Maven, encontrado [aqui](https://spring.io/guides/gs/maven/).
 
-Após configurar estas variáveis deve ser o suficiente clicar no botão de executar na própria janela de configuração das variáveis. Uma outra maneira de se executar o projeto é selecionar o arquivo principal (no caso, `br.engsoft.reprova.Reprova.java`) com o botão direito e clicar em "Run as".
 
-## Troubleshooting
+## Instruções de execução do Reprova
 
-Alguns dos passos que fiz durante as tentativas de se rodar o projeto foram utilizar, no diretório raiz do projeto, os comandos `mvn compile` e `mvn package`, de acordo com [essa documentação](https://spring.io/guides/gs/maven/). Não foi o suficiente, mas talvez seja necessário no processo. Acredito que apenas as instruções acima devam ser suficientes; caso contrário, vale a pena seguir estas aqui.
+O servidor será executado em `localhost:8888` e pode ser acessado pelo navegador. Neste caso, a lista de questões públicas estrá disponível ao usuário. Para verificar as questões privadas e adicionar novas questões, deve-se utilizar o token configurado. O acesso é feito por `localhost:8888?token=meuToken`.
 
-## Instruções de execução
-
-Ao ser iniciado, o servidor do Reprova escuta em `localhost:8888`. Se acessar este endpoint pelo navegador, ou fazer um `GET` via algum cliente REST (como o Postman), serão exibidas as questões públicas gravadas. Se acessar o endpoint passando como parâmetro o token (por exemplo, se seu token é `ABC`, o endpoint para a requisição seria `localhost:8888?token=ABC`) todas as questões serão listadas.
-
-Para inserir uma questão é necessário fazer uma requisição `POST` para `localhost:8888/api/questions?token=ABC`, com um payload no mesmo formato do exemplo:
+Alternativamente, para inserir uma nova questão, pode-se fazer uma requisição `POST` para `localhost:8888/api/questions?token=meuToken`, com um payload no mesmo formato do exemplo:
 
 ```JSON
 {
@@ -118,6 +120,6 @@ Para resgatar a questão é necesário fazer uma requisição `GET` para `localh
     }
 }
 ```
-Observe que todas as features do nosso projeto estavam ligadas
+No caso do exemplo, todas as features do nosso projeto estavam ligadas
 
 Uma coleção do Postman foi incluída no projeto para efeitos de teste (https://github.com/ghapereira/reprova/blob/master/Reprova.postman_collection.json).
